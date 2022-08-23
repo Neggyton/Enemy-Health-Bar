@@ -1,0 +1,19 @@
+{
+    "ModTitle": "Enemy Health Bar",
+    "ModVersion": "1.1",
+    "ModAuthor": "Neggy",
+    "DFUnity_Version": "0.14.3",
+    "ModDescription": "Adds a health bar to the HUD of the last creature you attacked.",
+    "GUID": "58ac624b-85e5-4544-b1ca-11cfaf8ab576",
+    "Files": [
+        "Assets/Game/Mods/EnemyHealthBar/Scripts/EnemyHealthBarMain.cs",
+        "Assets/Game/Mods/EnemyHealthBar/Scripts/HealthBar.cs",
+        "Assets/Game/Mods/EnemyHealthBar/Scripts/HorizontalProgress.cs",
+        "Assets/Game/Mods/EnemyHealthBar/Textures/UndeadHP_purple-BACKDROP(daggers).png",
+        "Assets/Game/Mods/EnemyHealthBar/Textures/UndeadHP_purple(daggers).png",
+        "Assets/Game/Mods/EnemyHealthBar/Enemy Health Bar.dfmod.json",
+        "Assets/Game/Mods/EnemyHealthBar/modsettings.json",
+        "Assets/Game/Mods/EnemyHealthBar/Textures/BloodHP(dags)_BD.png",
+        "Assets/Game/Mods/EnemyHealthBar/Textures/BloodHP(dags).png"
+    ]
+}
