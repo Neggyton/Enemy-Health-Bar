@@ -19,9 +19,7 @@ using DaggerfallWorkshop.Game.Guilds;
 public class PlayerHitRegister : WeaponManager
 {
 
-    WeaponManager weapon = GameManager.Instance.WeaponManager;
     GameObject mainCamera;
-    GameObject player;
     DaggerfallMissile missile = null;
     public DaggerfallEntityBehaviour hitNPC { get; private set; }
     public MobilePersonNPC villagerNpc { get; private set; }
@@ -33,7 +31,6 @@ public class PlayerHitRegister : WeaponManager
     {
         mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         playerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
-        player = transform.gameObject;
         villagerNpc = null;
 
     }
@@ -42,7 +39,7 @@ public class PlayerHitRegister : WeaponManager
     void Update()
     {
 
-        villagerNpc = !weapon.ScreenWeapon.IsAttacking() ? null : villagerNpc;
+        villagerNpc = ScreenWeapon.IsAttacking() ? null : villagerNpc;
 
         missile = FindObjectOfType<DaggerfallMissile>();
 
@@ -51,7 +48,7 @@ public class PlayerHitRegister : WeaponManager
             MissileCheck(missile);
 
         }
-        if (weapon.ScreenWeapon.WeaponType != WeaponTypes.Bow && weapon.ScreenWeapon.WeaponType != WeaponTypes.None && weapon.ScreenWeapon.IsAttacking())
+        if (ScreenWeapon.WeaponType != WeaponTypes.Bow && ScreenWeapon.WeaponType != WeaponTypes.None && ScreenWeapon.IsAttacking())
         {
             PhysCheck();
         }
@@ -65,7 +62,7 @@ public class PlayerHitRegister : WeaponManager
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
 
         //check for physical attacks
-        if (Physics.SphereCast(ray, weapon.SphereCastRadius, out hit, weapon.ScreenWeapon.Reach, playerLayerMask) && !WeaponEnvCheck(hit))
+        if (Physics.SphereCast(ray, SphereCastRadius, out hit, ScreenWeapon.Reach, playerLayerMask) && !WeaponEnvCheck(hit))
         {
             hitNPC = missile != null && missile.Caster != GameManager.Instance.PlayerEntityBehaviour && hitNPC ? hitNPC : hit.transform.GetComponent<DaggerfallEntityBehaviour>();
             //grabs the EntityBehaviour of the enemy in the location that was attacked
@@ -74,7 +71,7 @@ public class PlayerHitRegister : WeaponManager
             MobilePersonNPC mobileNpc = hit.transform.GetComponent<MobilePersonNPC>();
             villagerNpc = mobileNpc && !mobileNpc.IsGuard && mobileNpc.gameObject.activeSelf ? mobileNpc : null;
 
-            if (!villagerNpc && weapon.ScreenWeapon.GetCurrentFrame() == GameManager.Instance.WeaponManager.ScreenWeapon.GetHitFrame() && hitNPC)
+            if (!villagerNpc && ScreenWeapon.GetCurrentFrame() == GameManager.Instance.WeaponManager.ScreenWeapon.GetHitFrame() && hitNPC)
                 EnemyCheck();
         }
     }

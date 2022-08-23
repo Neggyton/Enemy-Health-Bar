@@ -31,7 +31,6 @@ namespace HealthBarMod
 
 
 
-
         public int location { get; private set; }
         public int scale { get; private set; }
 
@@ -53,7 +52,7 @@ namespace HealthBarMod
             ModSettings settings = mod.GetSettings();
             mod.IsReady = true;
 
-
+            
 
             location = 0; //settings.GetValue<int>("Location", "BarLocation");
             scale = settings.GetValue<int>("Health Bar Size", "BarSize");

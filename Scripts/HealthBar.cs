@@ -18,6 +18,7 @@ namespace HealthBarMod
     {
 
 
+        PlayerHitRegister target = new PlayerHitRegister();
         DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
         MobilePersonNPC villagerNpc = null;
         DaggerfallEntityBehaviour hitNPC = null;
@@ -59,7 +60,7 @@ namespace HealthBarMod
             scale = SetScale(scaleSettings);
             Back = new Panel();
             Health = new HorizontalProgress();
-            origNPC = EnemyHealthBarMain.Instance.hitNPC;
+            origNPC = target.hitNPC;
             hitNPC = origNPC;
             storedContext = GameManager.Instance.PlayerEnterExit.WorldContext;
 
@@ -100,8 +101,8 @@ namespace HealthBarMod
                 Enabled = false;
             }
 
-            villagerNpc = EnemyHealthBarMain.Instance.villagerNpc;
-            hitNPC = EnemyHealthBarMain.Instance.hitNPC;
+            villagerNpc = target.villagerNpc;
+            hitNPC = target.hitNPC;
 
             if (hitNPC && origNPC.GetInstanceID() != hitNPC.GetInstanceID())
             {
