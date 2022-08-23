@@ -14,7 +14,7 @@ using HealthBarMod;
 
 namespace HealthBarMod
 {
-    public class HealthBar : MonoBehaviour
+    public class HealthBar : Panel
     {
 
 
@@ -28,8 +28,8 @@ namespace HealthBarMod
         Texture2D backTexture;
         WorldContext storedContext;
 
-        Vector2 healthSize = new Vector2(512,64);
-        Vector2 backSize = new Vector2(512, 64);
+        Vector2 healthSize;
+        Vector2 backSize;
 
 
         string healthTextName;
@@ -46,23 +46,6 @@ namespace HealthBarMod
 
 
 
-
-        public static HealthBar Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-
-                    GameObject go = new GameObject();
-                    go.name = "HealthBar";
-                    instance = go.AddComponent<HealthBar>();
-
-                }
-
-                return instance;
-            }
-        }
 
 
 
@@ -114,10 +97,7 @@ namespace HealthBarMod
                 || storedContext != GameManager.Instance.PlayerEnterExit.WorldContext
                 || (!GameManager.Instance.IsPlayingGame() && GameManager.Instance.StateManager.CurrentState != StateManager.StateTypes.UI))
             {
-
-                hud.ParentPanel.Components.Remove(Health);
-                hud.ParentPanel.Components.Remove(Back);
-                Destroy(gameObject);
+                Enabled = false;
             }
 
             villagerNpc = EnemyHealthBarMain.Instance.villagerNpc;
@@ -185,15 +165,15 @@ namespace HealthBarMod
                     
                     //scale for use with NativePanel
 
-                    SetPanel(Health, healthSize);
-                    SetPanel(Back, backSize);
+                    SetPanel(Health, healthSize, healthTexture);
+                    SetPanel(Back, backSize, backTexture);
                     Health.ProgressTexture = healthTexture;
                     Back.BackgroundTexture = backTexture;
                     break;
 
                 case 1:
-                    SetPanel(Health, healthSize);
-                    SetPanel(Back, backSize);
+                    SetPanel(Health, healthSize, healthTexture);
+                    SetPanel(Back, backSize, backTexture);
                     Health.ProgressTexture = healthTexture;
                     Back.BackgroundTexture = backTexture;
                     break;
@@ -230,8 +210,10 @@ namespace HealthBarMod
             return scale;
         }
 
-        private BaseScreenComponent SetPanel(BaseScreenComponent panel, Vector2 size)
+        private BaseScreenComponent SetPanel(BaseScreenComponent panel, Vector2 size, Texture2D texture)
         {
+            size.x = texture.width;
+            size.y = texture.height;
             scaleVec = new Vector2(0, scale);
 
             //scaleVec = new Vector2(hud.HUDCompass.Size.x, 0);  For the compass location. Make a switch case later once you've put in the code for the Mod Settings.
