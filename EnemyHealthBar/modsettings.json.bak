@@ -1,0 +1,29 @@
+{
+	"Version": "1.0",
+	"Sections": [
+		{
+			"Name": "Location",
+			"Description": "Configure the location of the enemy's health bar.",
+			"IsAdvanced": false,
+			"Keys": [
+				{
+					"Options": [
+						"8",
+						"12",
+						"16",
+						"20"
+					],
+					"Value": 1,
+					"Name": "BarLocation",
+					"Description": "Choose to place the Health Bar on the bottom of the screen or above the compass.",
+					"$version": "v1",
+					"$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.MultipleChoiceKey"
+				
+				}
+			]	
+			
+		}
+	]
+		
+	
+}

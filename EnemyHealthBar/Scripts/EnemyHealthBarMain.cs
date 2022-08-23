@@ -26,20 +26,22 @@ namespace HealthBarMod
 
         private static Mod mod;
 
-        bool showingHealth = false;
         WeaponManager weapon = GameManager.Instance.WeaponManager;
         GameObject mainCamera;
         GameObject player;
-        PlayerEntity playerEntity = GameManager.Instance.PlayerEntity;
-        public DaggerfallEntityBehaviour hitNPC;
+        DaggerfallMissile missile = null;
+        public DaggerfallEntityBehaviour hitNPC { get; private set; }
+        public MobilePersonNPC villagerNpc { get; private set; }
 
-        public GameObject healthBarObj;
+
 
 
         public float SphereCastRadius = 0.25f;
         int playerLayerMask = 0;
 
-       
+        public int location { get; private set; }
+        public int scale { get; private set; }
+
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -54,25 +56,30 @@ namespace HealthBarMod
 
         private void Awake()
         {
+
+            ModSettings settings = mod.GetSettings();
             mod.IsReady = true;
 
             mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             playerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
             player = transform.gameObject;
-            healthBarObj = new GameObject("HealthBar");
 
+
+            location = 0; //settings.GetValue<int>("Location", "BarLocation");
+            scale = settings.GetValue<int>("Health Bar Size", "BarSize");
+            villagerNpc = null;
         }
 
         private void Update()
         {
-            
-            Debug.Log(GameManager.Instance.PlayerEntity.CurrentRestMode);
-            var missile = FindObjectOfType<DaggerfallMissile>();
-            
-            if (missile != null && missile.Caster.Entity == playerEntity)
+            villagerNpc = !weapon.ScreenWeapon.IsAttacking() ? null : villagerNpc;
+
+            missile = FindObjectOfType<DaggerfallMissile>();
+
+            if (missile != null && missile.Caster == GameManager.Instance.PlayerEntityBehaviour)
             {
                 MissileCheck(missile);
-                
+
             }
             if (weapon.ScreenWeapon.WeaponType != WeaponTypes.Bow && weapon.ScreenWeapon.WeaponType != WeaponTypes.None && weapon.ScreenWeapon.IsAttacking())
             {
@@ -83,26 +90,28 @@ namespace HealthBarMod
         }
 
 
-
-
         //This code checks to see if an enemy is hit by the Player.
         public void PhysCheck()
         {
-            if (weapon.ScreenWeapon.GetCurrentFrame() == weapon.ScreenWeapon.GetHitFrame())
+
+            RaycastHit hit;
+            Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+
+            //check for physical attacks
+            if (Physics.SphereCast(ray, weapon.SphereCastRadius, out hit, weapon.ScreenWeapon.Reach, playerLayerMask) && !WeaponEnvCheck(hit))
             {
-                RaycastHit hit;
-                Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+                    hitNPC = missile != null && missile.Caster != GameManager.Instance.PlayerEntityBehaviour && hitNPC ? hitNPC : hit.transform.GetComponent<DaggerfallEntityBehaviour>(); 
+                 //grabs the EntityBehaviour of the enemy in the location that was attacked
 
-                //check for physical attacks
-                if (Physics.SphereCast(ray, weapon.SphereCastRadius, out hit, weapon.ScreenWeapon.Reach, playerLayerMask) && !WeaponEnvCheck(hit))
-                {
 
-                    hitNPC = hit.transform.GetComponent<DaggerfallEntityBehaviour>(); //grabs the component of the enemy in the location that was attacked
+                MobilePersonNPC mobileNpc = hit.transform.GetComponent<MobilePersonNPC>();
+                villagerNpc = mobileNpc && !mobileNpc.IsGuard && mobileNpc.gameObject.activeSelf ? mobileNpc : null;
+
+                if (!villagerNpc && weapon.ScreenWeapon.GetCurrentFrame() == GameManager.Instance.WeaponManager.ScreenWeapon.GetHitFrame() && hitNPC)
                     EnemyCheck();
-                }
             }
         }
-        
+
         //Mostly vanilla code used from the WeaponManager, checks to see if the Player is hitting the environment.
         public bool WeaponEnvCheck(RaycastHit hit)
         {
@@ -110,14 +119,13 @@ namespace HealthBarMod
             DaggerfallAction action = hit.transform.gameObject.GetComponent<DaggerfallAction>();
             if (action)
             {
-                action.Receive(player, DaggerfallAction.TriggerTypes.Attack);
+                return true;
             }
 
             // Check if hit has an DaggerfallActionDoor component
             DaggerfallActionDoor actionDoor = hit.transform.gameObject.GetComponent<DaggerfallActionDoor>();
             if (actionDoor)
             {
-                actionDoor.AttemptBash(true);
                 return true;
             }
 
@@ -143,8 +151,14 @@ namespace HealthBarMod
                 return;
             else
                 hitNPC = missile.Targets[missile.Targets.Length - 1];
-            EnemyCheck();
-            
+
+            if (hitNPC.EntityType == EntityTypes.CivilianNPC && hitNPC.Entity.Team == MobileTeams.PlayerEnemy)
+            {
+                return;
+            }
+            else
+                EnemyCheck();
+
         }
 
         public void EnemyCheck()
@@ -160,5 +174,7 @@ namespace HealthBarMod
                     HealthBar.Instance.reset = true;
             }
         }
+
+
     }
 }

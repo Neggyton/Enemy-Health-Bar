@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.UserInterface;
@@ -9,7 +11,6 @@ using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Utility;
 using HealthBarMod;
-using Wenzil.Console.Commands;
 
 namespace HealthBarMod
 {
@@ -17,24 +18,33 @@ namespace HealthBarMod
     {
 
 
-
-
-        public HorizontalProgress Health;
-        public Vector2 baseSize;
-        const string baseTextName = "HealthBar2.png";
-        Texture2D baseTexture;
-        float origPercent;
-        float newPercent;
+        DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
+        MobilePersonNPC villagerNpc = null;
+        DaggerfallEntityBehaviour hitNPC = null;
+        DaggerfallEntityBehaviour origNPC = null;
+        HorizontalProgress Health;
         Panel Back;
-        const string backTextName = "Background.png";
+        Texture2D healthTexture;
         Texture2D backTexture;
-        public bool destroy;
-        DaggerfallHUD hud;
-        float timer = 15;
+        WorldContext storedContext;
+
+        Vector2 healthSize = new Vector2(512,64);
+        Vector2 backSize = new Vector2(512, 64);
+
+
+        string healthTextName;
+        string backTextName;
+        private float timer = 15;
         public bool reset = false;
-        DaggerfallEntity hitNPC = null;
+        public bool isVillager { get; private set; }
 
         static HealthBar instance = null;
+        
+        Vector2 scaleVec;
+        float scale;
+        bool unload = false;
+
+
 
 
         public static HealthBar Instance
@@ -50,7 +60,6 @@ namespace HealthBarMod
 
                 }
 
-
                 return instance;
             }
         }
@@ -61,67 +70,83 @@ namespace HealthBarMod
 
         private void Start()
         {
-            hitNPC = EnemyHealthBarMain.Instance.hitNPC.Entity;
-            hud = DaggerfallUI.Instance.DaggerfallHUD;
-            LoadTextures();
-
-            origPercent = hitNPC.CurrentHealthPercent;
-            newPercent = hitNPC.CurrentHealthPercent;
-
-
-            Health = new HorizontalProgress();
-            baseSize = new Vector2(100, 6);
-            Back = new Panel();
-            destroy = false;
-            Health.Size = baseSize;
-            Health.BackgroundColor = Color.clear;
-            Health.HorizontalAlignment = HorizontalAlignment.Center;
-            Health.VerticalAlignment = VerticalAlignment.None;
             
 
-            Health.Position = new Vector2(0, 192);
+            int scaleSettings = EnemyHealthBarMain.Instance.scale;
+            scale = SetScale(scaleSettings);
+            Back = new Panel();
+            Health = new HorizontalProgress();
+            origNPC = EnemyHealthBarMain.Instance.hitNPC;
+            hitNPC = origNPC;
+            storedContext = GameManager.Instance.PlayerEnterExit.WorldContext;
 
 
-            Health.ProgressTexture = baseTexture;
-            //Health.BackgroundTexture = baseTexture;
+            if (villagerNpc)
+            {
+                if (hitNPC.EntityType == EntityTypes.CivilianNPC && !villagerNpc.IsGuard)
+                {
+                    isVillager = true;
+                }
+            }
+            else
+                isVillager = false;
 
-            Back.Size = new Vector2(104, 10);
-            Back.BackgroundColor = Color.clear;
-            Back.HorizontalAlignment = HorizontalAlignment.Center;
-            Back.VerticalAlignment = VerticalAlignment.None;
-            Back.Position = new Vector2(0, 190);
-            Back.BackgroundTexture = backTexture;
 
 
-            hud.NativePanel.Components.Add(Back);
-            hud.NativePanel.Components.Add(Health);
+            LoadTextures();
+            Setup();
+
+            
+
+
+            hud.ParentPanel.Components.Add(Back);
+            hud.ParentPanel.Components.Add(Health);
         }
 
         private void Update()
         {
-            Health.Amount = hitNPC.CurrentHealthPercent;
-            TimeUpdate();
-
-
-                newPercent = EnemyHealthBarMain.Instance.hitNPC.Entity.CurrentHealthPercent;
-
-            if (GameManager.Instance.SaveLoadManager.LoadInProgress
+            if (isVillager
+                || !hitNPC
                 || GameManager.Instance.PlayerDeath.DeathInProgress
-                || newPercent <= 0
+                || !hitNPC.gameObject.activeSelf
                 || timer <= 0
-                || EnemyHealthBarMain.Instance.hitNPC.Entity.WorldContext != GameManager.Instance.PlayerEnterExit.WorldContext
-                || GameManager.Instance.PlayerEntity.IsResting)
+                || GameManager.Instance.PlayerEntity.IsResting
+                || storedContext != GameManager.Instance.PlayerEnterExit.WorldContext
+                || (!GameManager.Instance.IsPlayingGame() && GameManager.Instance.StateManager.CurrentState != StateManager.StateTypes.UI))
             {
-                hud.NativePanel.Components.Remove(Health);
-                hud.NativePanel.Components.Remove(Back);
+
+                hud.ParentPanel.Components.Remove(Health);
+                hud.ParentPanel.Components.Remove(Back);
                 Destroy(gameObject);
             }
 
+            villagerNpc = EnemyHealthBarMain.Instance.villagerNpc;
+            hitNPC = EnemyHealthBarMain.Instance.hitNPC;
+
+            if (hitNPC && origNPC.GetInstanceID() != hitNPC.GetInstanceID())
+            {
+                LoadTextures();
+                Setup();
+                origNPC = hitNPC;
+            }
+            Health.Amount = hitNPC.Entity.CurrentHealthPercent;
+            TimeUpdate();
         }
 
         void LoadTextures()
         {
-            if (!TextureReplacement.TryImportImage(baseTextName, true, out baseTexture))
+            if (hitNPC.Entity.Team != MobileTeams.Undead)
+            {
+                healthTextName = "BloodHP(dags).png";
+                backTextName = "BloodHP(dags)_BD.png";
+                
+            }
+            else
+            {
+                healthTextName = "BloodHP(dags).png";
+                backTextName = "BloodHP(dags)_BD.png";
+            }
+            if (!TextureReplacement.TryImportImage(healthTextName, true, out healthTexture))
             {
                 Debug.LogError("TravelOptions: Unable to load the base UI image.");
             }
@@ -129,10 +154,13 @@ namespace HealthBarMod
             {
                 Debug.LogError("TravelOptions: Unable to load the base UI image.");
             }
+
+            healthTexture = Crop(healthTexture);
+            backTexture = Crop(backTexture);
+
+            Debug.Log(backTexture.height);
+
         }
-
-
-
 
 
         void TimeUpdate()
@@ -147,5 +175,83 @@ namespace HealthBarMod
                 reset = false;
             }
         }
+        void Setup()
+        {
+            int loc = EnemyHealthBarMain.Instance.location;
+
+            switch (loc)
+            {
+                case 0:
+                    
+                    //scale for use with NativePanel
+
+                    SetPanel(Health, healthSize);
+                    SetPanel(Back, backSize);
+                    Health.ProgressTexture = healthTexture;
+                    Back.BackgroundTexture = backTexture;
+                    break;
+
+                case 1:
+                    SetPanel(Health, healthSize);
+                    SetPanel(Back, backSize);
+                    Health.ProgressTexture = healthTexture;
+                    Back.BackgroundTexture = backTexture;
+                    break;
+            }
+        }
+
+        private Texture2D Crop(Texture2D crop)
+        {
+            Color[] c = crop.GetPixels(67, 0, 378, 40);
+            crop = new Texture2D(378, 40);
+            crop.SetPixels(c);
+            crop.Apply();
+            return crop;
+        }
+
+        private float SetScale(int scaleSettings)
+        {
+            switch (scaleSettings)
+            {
+                case 0:
+                    scale = 8;
+                    break;
+                case 1:
+                    scale = 12;
+                    break;
+                case 2:
+                    scale = 16;
+                    break;
+                case 3:
+                    scale = 20;
+                    break;
+            }
+
+            return scale;
+        }
+
+        private BaseScreenComponent SetPanel(BaseScreenComponent panel, Vector2 size)
+        {
+            scaleVec = new Vector2(0, scale);
+
+            //scaleVec = new Vector2(hud.HUDCompass.Size.x, 0);  For the compass location. Make a switch case later once you've put in the code for the Mod Settings.
+
+            float x = size.x / size.y;
+            scaleVec.x = scaleVec.y * x;
+            panel.Scale = hud.NativePanel.LocalScale;
+            scaleVec *= panel.Scale;
+            size = scaleVec;
+
+            //create the health bar
+            panel.Size = size;
+            panel.BackgroundColor = Color.clear;
+            panel.HorizontalAlignment = HorizontalAlignment.Center;
+            panel.VerticalAlignment = VerticalAlignment.None;
+            panel.Position = new Vector2(hud.ParentPanel.Size.x - panel.Size.x, hud.ParentPanel.Size.y - panel.Size.y - (10 * hud.NativePanel.Scale.y));
+
+            return panel;
+;
+        }
+
     }
 }

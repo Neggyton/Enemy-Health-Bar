@@ -1,0 +1,9 @@
+v1.1
+-Added art by TacticalTrickery
+-Fixed a bug that caused the bar's backdrop to remain after NPC's death
+-Fixed a bug that caused doors to register multiple hits on a single swing
+-Fixed a bug that caused the health bar to flicker when attacking an enemy after entering a dungeon
+-Fixed a bug that caused a null exception when the player's raycast hit check collided with an enemy's missile
+-Fixed a bug that caused the health bar to stay on screen forever if a save was reloaded while it was visible
+-Fixed a bug that caused the health bar to not update correctly when switching between targets
+-Improved interaction with MobilePersonNPCs

@@ -1,0 +1,29 @@
+{
+	"Version": "1.0",
+	"Sections": [
+		{
+			"Name": "Health Bar Size",
+			"Description": "Configures the size of the Health Bar",
+			"IsAdvanced": false,
+			"Keys": [
+				{
+					"Options": [
+						"8",
+						"12",
+						"16",
+						"20"
+					],
+					"Value": 1,
+					"Name": "BarSize",
+					"Description": "Choose the size from the options.  8 is very small and 20 is big.",
+					"$version": "v1",
+					"$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.MultipleChoiceKey"
+				
+				}
+			]	
+			
+		}
+	]
+		
+	
+}
