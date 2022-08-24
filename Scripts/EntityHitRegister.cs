@@ -16,7 +16,7 @@ using DaggerfallWorkshop.Game.Weather;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Guilds;
 
-public class PlayerHitRegister : WeaponManager
+public class EntityHitRegister : WeaponManager
 {
 
     GameObject mainCamera;
@@ -24,7 +24,8 @@ public class PlayerHitRegister : WeaponManager
     public DaggerfallEntityBehaviour hitNPC { get; private set; }
     public MobilePersonNPC villagerNpc { get; private set; }
 
-        int playerLayerMask = 0;
+    int playerLayerMask = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -33,12 +34,13 @@ public class PlayerHitRegister : WeaponManager
         playerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
         villagerNpc = null;
 
+        ScreenWeapon = GameManager.Instance.WeaponManager.ScreenWeapon;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-
         villagerNpc = ScreenWeapon.IsAttacking() ? null : villagerNpc;
 
         missile = FindObjectOfType<DaggerfallMissile>();
@@ -62,16 +64,17 @@ public class PlayerHitRegister : WeaponManager
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
 
         //check for physical attacks
-        if (Physics.SphereCast(ray, SphereCastRadius, out hit, ScreenWeapon.Reach, playerLayerMask) && !WeaponEnvCheck(hit))
+        if (Physics.SphereCast(ray, SphereCastRadius, out hit,ScreenWeapon.Reach, playerLayerMask) && !WeaponEnvCheck(hit))
         {
             hitNPC = missile != null && missile.Caster != GameManager.Instance.PlayerEntityBehaviour && hitNPC ? hitNPC : hit.transform.GetComponent<DaggerfallEntityBehaviour>();
             //grabs the EntityBehaviour of the enemy in the location that was attacked
 
+            Debug.Log(hitNPC);
 
             MobilePersonNPC mobileNpc = hit.transform.GetComponent<MobilePersonNPC>();
             villagerNpc = mobileNpc && !mobileNpc.IsGuard && mobileNpc.gameObject.activeSelf ? mobileNpc : null;
 
-            if (!villagerNpc && ScreenWeapon.GetCurrentFrame() == GameManager.Instance.WeaponManager.ScreenWeapon.GetHitFrame() && hitNPC)
+            if (!villagerNpc && ScreenWeapon.GetCurrentFrame() == ScreenWeapon.GetHitFrame() && hitNPC)
                 EnemyCheck();
         }
     }
@@ -129,9 +132,16 @@ public class PlayerHitRegister : WeaponManager
     {
         if (hitNPC != null)
         {
-            //make an event
+            Debug.Log("yup, here too");
+            OnTargetNPC();
 
         }
+    }
+
+    public delegate void TargetNPCEventHandler();
+    public static event TargetNPCEventHandler TargetNPC;
+    protected virtual void OnTargetNPC()
+    {
     }
 
 }

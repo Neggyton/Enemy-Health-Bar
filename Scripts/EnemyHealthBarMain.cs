@@ -26,14 +26,13 @@ namespace HealthBarMod
 
         private static Mod mod;
 
-        HealthBar healthBar = new HealthBar();
-
-
+        
 
 
         public int location { get; private set; }
         public int scale { get; private set; }
 
+        HealthBar healthBar;
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -46,21 +45,29 @@ namespace HealthBarMod
             mod.IsReady = true;
         }
 
+
+
         private void Awake()
         {
-
             ModSettings settings = mod.GetSettings();
             mod.IsReady = true;
 
-            
 
             location = 0; //settings.GetValue<int>("Location", "BarLocation");
             scale = settings.GetValue<int>("Health Bar Size", "BarSize");
+
+            EntityHitRegister test = GetComponent<EntityHitRegister>();
+            Debug.Log("This constructor ran");
+
+        }
+
+        private void Start()
+        {
+
         }
 
         private void Update()
         {
-
         }
 
 
