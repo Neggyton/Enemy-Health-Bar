@@ -133,15 +133,19 @@ public class EntityHitRegister : WeaponManager
         if (hitNPC != null)
         {
             Debug.Log("yup, here too");
-            OnTargetNPC();
+            OnTargetNPC(hitNPC);
 
         }
     }
 
-    public delegate void TargetNPCEventHandler();
+    public delegate DaggerfallEntityBehaviour TargetNPCEventHandler(DaggerfallEntityBehaviour target);
     public static event TargetNPCEventHandler TargetNPC;
-    protected virtual void OnTargetNPC()
+    protected virtual void OnTargetNPC(DaggerfallEntityBehaviour target)
     {
+        if (TargetNPC != null)
+        {
+            TargetNPC(target);
+        }
     }
 
 }

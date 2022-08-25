@@ -14,11 +14,10 @@ using HealthBarMod;
 
 namespace HealthBarMod
 {
-    public class HealthBar : DaggerfallHUD
+    public class HealthBar : Panel
     {
 
 
-        DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
         MobilePersonNPC villagerNpc = null;
         public DaggerfallEntityBehaviour hitNPC = null;
         DaggerfallEntityBehaviour origNPC = null;
@@ -41,19 +40,17 @@ namespace HealthBarMod
         
         Vector2 scaleVec;
         float scale;
+        public int scaleSettings;
+        public int loc;
 
 
 
-        public HealthBar(IUserInterfaceManager uimanager)
-            : base(uimanager)
+        public HealthBar()
+            :base()
         {
-            EntityHitRegister.TargetNPC += OnTargetNPC;
-            Enabled = false;
-            int scaleSettings = EnemyHealthBarMain.Instance.scale;
-            scale = SetScale(scaleSettings);
+            
             Back = new Panel();
             Health = new HorizontalProgress();
-            storedContext = GameManager.Instance.PlayerEnterExit.WorldContext;
             
 
             if (villagerNpc)
@@ -65,33 +62,35 @@ namespace HealthBarMod
             }
             else
                 isVillager = false;
+         
 
-
-            DaggerfallUI.UIManager.PushWindow(this);
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(Back);
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(Health);
         }
 
 
         public void Start()
         {
-            
+            LoadTextures();
+            PanelSetup();
 
-            
+
+            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(Back);
+            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(Health);
+
         }
 
         public override void Update()
         {
-            Debug.Log(Enabled);
-            if (origNPC == null || (hitNPC && origNPC.GetInstanceID() != hitNPC.GetInstanceID()))
+            if (!origNPC || (hitNPC && origNPC.GetInstanceID() != hitNPC.GetInstanceID()))
             {
                 LoadTextures();
                 PanelSetup();
                 origNPC = hitNPC;
 
+                storedContext = GameManager.Instance.PlayerEnterExit.WorldContext;
 
             }
-            Debug.Log("we movin");
+            Debug.Log(Health.Size);
+            Debug.Log(Health.Position);
             if (hitNPC)
             {
 
@@ -106,7 +105,6 @@ namespace HealthBarMod
                 || storedContext != GameManager.Instance.PlayerEnterExit.WorldContext
                 || (!GameManager.Instance.IsPlayingGame() && GameManager.Instance.StateManager.CurrentState != StateManager.StateTypes.UI))
             {
-                Enabled = false;
             }
 
 
@@ -116,16 +114,22 @@ namespace HealthBarMod
         }
         public override void Draw()
         {
-
                 base.Draw();
         }
         void LoadTextures()
         {
-            if (hitNPC.Entity.Team != MobileTeams.Undead)
+            //switch (hitNPC.Entity.Team)
+            //{
+            //    case MobileTeams.Undead:
+            //    case MobileTeams:
+            //        healthTextName = "BloodHP(dags).png";
+            //        backTextName = "BloodHP(dags)_BD.png";
+            //        break;
+            //}
+            if (!hitNPC || hitNPC.Entity.Team != MobileTeams.Undead)
             {
                 healthTextName = "BloodHP(dags).png";
                 backTextName = "BloodHP(dags)_BD.png";
-                
             }
             else
             {
@@ -165,8 +169,6 @@ namespace HealthBarMod
         }
         void PanelSetup()
         {
-            int loc = EnemyHealthBarMain.Instance.location;
-
             switch (loc)
             {
                 case 0:
@@ -199,6 +201,7 @@ namespace HealthBarMod
 
         private float SetScale(int scaleSettings)
         {
+            scaleSettings = 1;
             switch (scaleSettings)
             {
                 case 0:
@@ -220,6 +223,9 @@ namespace HealthBarMod
 
         private BaseScreenComponent SetPanel(BaseScreenComponent panel, Vector2 size, Texture2D texture)
         {
+
+            DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
+            scale = SetScale(scaleSettings);
             size.x = texture.width;
             size.y = texture.height;
             scaleVec = new Vector2(0, scale);
@@ -228,7 +234,7 @@ namespace HealthBarMod
 
             float x = size.x / size.y;
             scaleVec.x = scaleVec.y * x;
-            panel.Scale = hud.NativePanel.LocalScale;
+            panel.Scale = DaggerfallUI.Instance.DaggerfallHUD.NativePanel.LocalScale;
             scaleVec *= panel.Scale;
             size = scaleVec;
 
@@ -243,9 +249,7 @@ namespace HealthBarMod
 ;
         }
 
-        public void OnTargetNPC()
-        {
-        }
+
 
     }
 }
