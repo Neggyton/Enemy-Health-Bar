@@ -69,7 +69,6 @@ public class EntityHitRegister : WeaponManager
             hitNPC = missile != null && missile.Caster != GameManager.Instance.PlayerEntityBehaviour && hitNPC ? hitNPC : hit.transform.GetComponent<DaggerfallEntityBehaviour>();
             //grabs the EntityBehaviour of the enemy in the location that was attacked
 
-            Debug.Log(hitNPC);
 
             MobilePersonNPC mobileNpc = hit.transform.GetComponent<MobilePersonNPC>();
             villagerNpc = mobileNpc && !mobileNpc.IsGuard && mobileNpc.gameObject.activeSelf ? mobileNpc : null;
@@ -130,9 +129,8 @@ public class EntityHitRegister : WeaponManager
 
     public void EnemyCheck()
     {
-        if (hitNPC != null)
+        if (hitNPC != null && hitNPC.EntityType != EntityTypes.Player)
         {
-            Debug.Log("yup, here too");
             OnTargetNPC(hitNPC);
 
         }

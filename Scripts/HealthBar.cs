@@ -18,24 +18,20 @@ namespace HealthBarMod
     {
 
 
-        MobilePersonNPC villagerNpc = null;
         public DaggerfallEntityBehaviour hitNPC = null;
-        DaggerfallEntityBehaviour origNPC = null;
         HorizontalProgress Health;
         Panel Back;
         Texture2D healthTexture = Texture2D.whiteTexture;
         Texture2D backTexture = Texture2D.whiteTexture;
-        WorldContext storedContext;
 
         Vector2 healthSize = Vector2.zero;
         Vector2 backSize = Vector2.zero;
 
-
+        bool init = false;
         string healthTextName;
         string backTextName;
         private float timer = 15;
-        public bool reset = false;
-        public bool isVillager { get; private set; }
+        public bool timerReset = false;
 
         
         Vector2 scaleVec;
@@ -47,74 +43,60 @@ namespace HealthBarMod
 
         public HealthBar()
             :base()
-        {
+        { 
             
             Back = new Panel();
             Health = new HorizontalProgress();
-            
-
-            if (villagerNpc)
-            {
-                if (hitNPC.EntityType == EntityTypes.CivilianNPC && !villagerNpc.IsGuard)
-                {
-                    isVillager = true;
-                }
-            }
-            else
-                isVillager = false;
-         
-
-        }
 
 
-        public void Start()
-        {
             LoadTextures();
             PanelSetup();
-
-
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(Back);
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(Health);
+            
+            Components.Add(Back);
+            Components.Add(Health);
 
         }
+
+
 
         public override void Update()
         {
-            if (!origNPC || (hitNPC && origNPC.GetInstanceID() != hitNPC.GetInstanceID()))
-            {
-                LoadTextures();
-                PanelSetup();
-                origNPC = hitNPC;
-
-                storedContext = GameManager.Instance.PlayerEnterExit.WorldContext;
-
-            }
-            Debug.Log(Health.Size);
-            Debug.Log(Health.Position);
             if (hitNPC)
             {
+                float healthPercent = hitNPC.Entity.CurrentHealth / (float) hitNPC.Entity.MaxHealth;
+                if (!init)
+                {
+                    Health.Amount = healthPercent;
+                    LoadTextures();
+                    PanelSetup();
+                    init = true;
+                }
+                else
+                {
+                    Health.Amount = healthPercent;
+                }
+                if (!hitNPC
+                    || GameManager.Instance.PlayerDeath.DeathInProgress
+                    || !hitNPC.gameObject.activeSelf
+                    || timer <= 0
+                    || GameManager.Instance.PlayerEntity.IsResting
+                    || (!GameManager.Instance.IsPlayingGame() && GameManager.Instance.StateManager.CurrentState != StateManager.StateTypes.UI))
+                {
+                    hitNPC = null;
+                    init = false;
+                    OnKill();
 
-                Health.Amount = hitNPC.Entity.CurrentHealthPercent;
+                }
+
+
+
+                TimeUpdate();
+                base.Update();
             }
-            if (isVillager
-                || !hitNPC
-                || GameManager.Instance.PlayerDeath.DeathInProgress
-                || !hitNPC.gameObject.activeSelf
-                || timer <= 0
-                || GameManager.Instance.PlayerEntity.IsResting
-                || storedContext != GameManager.Instance.PlayerEnterExit.WorldContext
-                || (!GameManager.Instance.IsPlayingGame() && GameManager.Instance.StateManager.CurrentState != StateManager.StateTypes.UI))
-            {
-            }
-
-
-
-            TimeUpdate();
-            base.Update();
         }
         public override void Draw()
         {
-                base.Draw();
+            base.Draw();
         }
         void LoadTextures()
         {
@@ -161,10 +143,10 @@ namespace HealthBarMod
             {
                 timer -= Time.deltaTime;
             }
-            if (reset)
+            if (timerReset)
             {
                 timer = 15;
-                reset = false;
+                timerReset = false;
             }
         }
         void PanelSetup()
@@ -249,7 +231,13 @@ namespace HealthBarMod
 ;
         }
 
+        public delegate void KillEventHandler();
+        public static event KillEventHandler Kill;
 
+        private void OnKill()
+        {
+            Kill?.Invoke();
+        }
 
     }
 }

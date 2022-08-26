@@ -26,16 +26,14 @@ namespace HealthBarMod
 
         private static Mod mod;
 
-        DaggerfallEntityBehaviour hitNPC = null;
-        
-
+        bool barActive = false;
+        ModSettings settings;
 
         public int location { get; private set; }
         public int scale { get; private set; }
 
-        HealthBar healthBar;
+        HealthBar healthBar = null;
 
-        public int test;
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -53,46 +51,79 @@ namespace HealthBarMod
 
         private void Awake()
         {
-            ModSettings settings = mod.GetSettings();
             mod.IsReady = true;
-
             
-
         }
 
         private void Start()
         {
-            healthBar = new HealthBar();
-            healthBar.loc = 0; //settings.GetValue<int>("Location", "BarLocation");
-            //healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
+            settings = mod.GetSettings();
 
-            hitNPC = healthBar.hitNPC;
+            GameManager.OnEnemySpawn += OnEnemySpawn;
             EntityHitRegister.TargetNPC += OnTargetNPC;
-            Debug.Log("This constructor ran");
 
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(healthBar);
+            SaveLoadManager.OnLoad += RaiseOnLoadEvent;
+            HealthBar.Kill += OnKill;
+
         }
 
         private void Update()
         {
-            Debug.Log(DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size);
-            if (healthBar.hitNPC)
-                healthBar.Update();
+            if (GameManager.Instance.IsPlayingGame())
+                if (healthBar.hitNPC)
+                {
+                    healthBar.Update();
+                }
         }
 
         private void OnGUI()
         {
-            if(healthBar.hitNPC)
-                healthBar.Draw();
+            if (GameManager.Instance.IsPlayingGame())
+            {
+                if (healthBar.hitNPC)
+                {
+                    healthBar.Draw();
+                }
+            } 
         }
 
-        public DaggerfallEntityBehaviour OnTargetNPC(DaggerfallEntityBehaviour target)
-        {
-            healthBar.hitNPC = target;
-            return healthBar.hitNPC;
-        }
+
         //This code checks to see if an enemy is hit by the Player.
 
+        public void OnEnemySpawn(GameObject enemy)
+        {
+            healthBar = new HealthBar();
+            Debug.Log(healthBar.Position);
+            healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Scale;
+            healthBar.Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
+            healthBar.loc = 0; //settings.GetValue<int>("Location", "BarLocation");
+            healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
+
+            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(healthBar);
+            GameManager.OnEnemySpawn -= OnEnemySpawn;
+        }
+        public DaggerfallEntityBehaviour OnTargetNPC(DaggerfallEntityBehaviour target)
+        {
+            healthBar.timerReset = true;
+            if (target != healthBar.hitNPC)
+            {
+                healthBar.hitNPC = target;
+                return healthBar.hitNPC;
+            }
+            return healthBar.hitNPC;
+        }
+
+        public void RaiseOnLoadEvent(SaveData_v1 saveData)
+        {
+            healthBar.hitNPC = null;
+
+            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Remove(healthBar);
+        }
+
+        public void OnKill()
+        {
+            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Remove(healthBar);
+        }
 
     }
 }
