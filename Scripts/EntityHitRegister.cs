@@ -41,7 +41,6 @@ public class EntityHitRegister : WeaponManager
     // Update is called once per frame
     void Update()
     {
-        villagerNpc = ScreenWeapon.IsAttacking() ? null : villagerNpc;
 
         missile = FindObjectOfType<DaggerfallMissile>();
 
@@ -118,18 +117,14 @@ public class EntityHitRegister : WeaponManager
         else
             hitNPC = missile.Targets[missile.Targets.Length - 1];
 
-        if (hitNPC.EntityType == EntityTypes.CivilianNPC && hitNPC.Entity.Team == MobileTeams.PlayerEnemy)
-        {
-            return;
-        }
-        else
-            EnemyCheck();
+        EnemyCheck();
 
     }
 
     public void EnemyCheck()
     {
-        if (hitNPC != null && hitNPC.EntityType != EntityTypes.Player)
+        float npcHealth = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
+        if (hitNPC != null && hitNPC.EntityType != EntityTypes.Player && npcHealth != 0)
         {
             OnTargetNPC(hitNPC);
 

@@ -75,7 +75,7 @@ namespace HealthBarMod
                 {
                     Health.Amount = healthPercent;
                 }
-                if (!hitNPC
+                if (Health.Amount == 0
                     || GameManager.Instance.PlayerDeath.DeathInProgress
                     || !hitNPC.gameObject.activeSelf
                     || timer <= 0
