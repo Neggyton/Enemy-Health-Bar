@@ -17,6 +17,7 @@
         "Assets/Game/Mods/Enemy-Health-Bar/Textures/Background.png",
         "Assets/Game/Mods/Enemy-Health-Bar/Textures/HealthBar2.png",
         "Assets/Game/Mods/Enemy-Health-Bar/Textures/BloodHP(dags).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/UndeadHP_purple-BACKDROP(daggers).png"
+        "Assets/Game/Mods/Enemy-Health-Bar/Textures/UndeadHP_purple-BACKDROP(daggers).png",
+        "Assets/Game/Mods/Enemy-Health-Bar/Textures/EnemyHP_bloodRed(daggers).png"
     ]
 }

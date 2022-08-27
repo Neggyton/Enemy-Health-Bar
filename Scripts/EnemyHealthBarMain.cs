@@ -1,20 +1,12 @@
 using System;
 using UnityEngine;
-using DaggerfallConnect;
-using DaggerfallConnect.Arena2;
-using DaggerfallConnect.Utility;
-using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
 using DaggerfallWorkshop.Game.Serialization;
-using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.Weather;
 using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallWorkshop.Game.Guilds;
+using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 
 namespace HealthBarMod
@@ -26,13 +18,12 @@ namespace HealthBarMod
 
         private static Mod mod;
 
-        bool barActive = false;
-        ModSettings settings;
 
         public int location { get; private set; }
         public int scale { get; private set; }
 
         HealthBar healthBar = null;
+        ModSettings settings;
 
 
         [Invoke(StateManager.StateTypes.Start, 0)]
@@ -47,61 +38,42 @@ namespace HealthBarMod
             mod.IsReady = true;
         }
 
-
-
-        private void Awake()
-        {
-            mod.IsReady = true;
-            
-        }
-
         private void Start()
         {
+
+            mod.IsReady = true;
             settings = mod.GetSettings();
 
-            GameManager.OnEnemySpawn += OnEnemySpawn;
             EntityHitRegister.TargetNPC += OnTargetNPC;
-
             SaveLoadManager.OnLoad += RaiseOnLoadEvent;
-            HealthBar.Kill += OnKill;
+
+            healthBar = new HealthBar();
+            healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.LocalScale;
+            healthBar.Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
+            healthBar.loc = 0; //settings.GetValue<int>("Location", "BarLocation");
+            healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
+            healthBar.AutoSize = AutoSizeModes.ScaleToFit;
+            healthBar.Parent = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel;
 
         }
 
         private void Update()
         {
-            if (GameManager.Instance.IsPlayingGame())
+            if (GameManager.Instance.IsPlayingGame() && healthBar != null)
                 if (healthBar.hitNPC)
-                {
                     healthBar.Update();
-                }
         }
 
         private void OnGUI()
         {
-            if (GameManager.Instance.IsPlayingGame())
-            {
+            if (GameManager.Instance.IsPlayingGame() && healthBar != null)
                 if (healthBar.hitNPC)
-                {
                     healthBar.Draw();
-                }
-            } 
         }
 
 
         //This code checks to see if an enemy is hit by the Player.
 
-        public void OnEnemySpawn(GameObject enemy)
-        {
-            healthBar = new HealthBar();
-            Debug.Log(healthBar.Position);
-            healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Scale;
-            healthBar.Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
-            healthBar.loc = 0; //settings.GetValue<int>("Location", "BarLocation");
-            healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
-
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(healthBar);
-            GameManager.OnEnemySpawn -= OnEnemySpawn;
-        }
         public DaggerfallEntityBehaviour OnTargetNPC(DaggerfallEntityBehaviour target)
         {
             healthBar.timerReset = true;
@@ -115,15 +87,9 @@ namespace HealthBarMod
 
         public void RaiseOnLoadEvent(SaveData_v1 saveData)
         {
-            healthBar.hitNPC = null;
+            if (healthBar != null)
+                healthBar.hitNPC = null;
 
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Remove(healthBar);
         }
-
-        public void OnKill()
-        {
-            DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Remove(healthBar);
-        }
-
     }
 }

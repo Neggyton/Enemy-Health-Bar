@@ -1,133 +1,94 @@
 using System;
 using UnityEngine;
-using DaggerfallConnect;
-using DaggerfallConnect.Arena2;
-using DaggerfallConnect.Utility;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Utility.ModSupport;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
-using DaggerfallWorkshop.Game.Serialization;
-using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.Weather;
-using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallWorkshop.Game.Guilds;
 
 public class EntityHitRegister : WeaponManager
 {
 
     GameObject mainCamera;
-    DaggerfallMissile missile = null;
     public DaggerfallEntityBehaviour hitNPC { get; private set; }
-    public MobilePersonNPC villagerNpc { get; private set; }
 
     int playerLayerMask = 0;
-
+    float timer = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         playerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
-        villagerNpc = null;
-
         ScreenWeapon = GameManager.Instance.WeaponManager.ScreenWeapon;
-
+        SphereCastRadius = 0.15f;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (timer > 0)
+        {
+            Countdown();
+            return;
+        }
 
+        DaggerfallMissile missile = null;
         missile = FindObjectOfType<DaggerfallMissile>();
 
         if (missile != null && missile.Caster == GameManager.Instance.PlayerEntityBehaviour)
         {
             MissileCheck(missile);
-
         }
         if (ScreenWeapon.WeaponType != WeaponTypes.Bow && ScreenWeapon.WeaponType != WeaponTypes.None && ScreenWeapon.IsAttacking())
         {
-            PhysCheck();
+            PhysCheck(missile);
         }
 
     }
 
-    public void PhysCheck()
+    public void PhysCheck(DaggerfallMissile missile)
     {
 
         RaycastHit hit;
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
 
         //check for physical attacks
-        if (Physics.SphereCast(ray, SphereCastRadius, out hit,ScreenWeapon.Reach, playerLayerMask) && !WeaponEnvCheck(hit))
+        if (Physics.SphereCast(ray, SphereCastRadius, out hit,ScreenWeapon.Reach, playerLayerMask))
         {
-            hitNPC = missile != null && missile.Caster != GameManager.Instance.PlayerEntityBehaviour && hitNPC ? hitNPC : hit.transform.GetComponent<DaggerfallEntityBehaviour>();
+            hitNPC = hit.transform.GetComponent<DaggerfallEntityBehaviour>();
             //grabs the EntityBehaviour of the enemy in the location that was attacked
 
 
-            MobilePersonNPC mobileNpc = hit.transform.GetComponent<MobilePersonNPC>();
-            villagerNpc = mobileNpc && !mobileNpc.IsGuard && mobileNpc.gameObject.activeSelf ? mobileNpc : null;
 
-            if (!villagerNpc && ScreenWeapon.GetCurrentFrame() == ScreenWeapon.GetHitFrame() && hitNPC)
+            //if (ScreenWeapon.GetCurrentFrame() == ScreenWeapon.GetHitFrame() && hitNPC)
                 EnemyCheck();
         }
     }
 
     //Mostly vanilla code used from the WeaponManager, checks to see if the Player is hitting the environment.
-    public bool WeaponEnvCheck(RaycastHit hit)
-    {
-        // Check if hit has an DaggerfallAction component
-        DaggerfallAction action = hit.transform.gameObject.GetComponent<DaggerfallAction>();
-        if (action)
-        {
-            return true;
-        }
 
-        // Check if hit has an DaggerfallActionDoor component
-        DaggerfallActionDoor actionDoor = hit.transform.gameObject.GetComponent<DaggerfallActionDoor>();
-        if (actionDoor)
-        {
-            return true;
-        }
-
-        // Check if player hit a static exterior door
-        if (GameManager.Instance.PlayerActivate.AttemptExteriorDoorBash(hit))
-        {
-            return true;
-        }
-
-        // Make hitting walls do a thud or clinging sound (not in classic)
-        if (GameObjectHelper.IsStaticGeometry(hit.transform.gameObject))
-        {
-            return true;
-        }
-
-        return false;
-    }
 
 
     public void MissileCheck(DaggerfallMissile missile)
     {
         if (missile.Targets.Length == 0)
             return;
-        else
-            hitNPC = missile.Targets[missile.Targets.Length - 1];
 
+        hitNPC = missile.Targets[missile.Targets.Length - 1];
         EnemyCheck();
 
     }
 
     public void EnemyCheck()
     {
+        if (!hitNPC)
+            return;
+
         float npcHealth = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
-        if (hitNPC != null && hitNPC.EntityType != EntityTypes.Player && npcHealth != 0)
+        if (hitNPC.EntityType != EntityTypes.Player)
         {
             OnTargetNPC(hitNPC);
-
+            timer = 0.25f;
         }
     }
 
@@ -135,10 +96,11 @@ public class EntityHitRegister : WeaponManager
     public static event TargetNPCEventHandler TargetNPC;
     protected virtual void OnTargetNPC(DaggerfallEntityBehaviour target)
     {
-        if (TargetNPC != null)
-        {
-            TargetNPC(target);
-        }
+        TargetNPC?.Invoke(target);
     }
 
+    private void Countdown()
+    {
+        timer -= Time.deltaTime;
+    }
 }

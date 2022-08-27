@@ -1,16 +1,11 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Utility.AssetInjection;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.Utility.ModSupport;
-using DaggerfallWorkshop.Utility;
-using HealthBarMod;
 
 namespace HealthBarMod
 {
@@ -32,6 +27,7 @@ namespace HealthBarMod
         string backTextName;
         private float timer = 15;
         public bool timerReset = false;
+        public const int borderSize = 10;
 
         
         Vector2 scaleVec;
@@ -51,6 +47,8 @@ namespace HealthBarMod
 
             LoadTextures();
             PanelSetup();
+
+            SetMargins(Margins.All, borderSize);
             
             Components.Add(Back);
             Components.Add(Health);
@@ -61,6 +59,7 @@ namespace HealthBarMod
 
         public override void Update()
         {
+            
             if (hitNPC)
             {
                 float healthPercent = hitNPC.Entity.CurrentHealth / (float) hitNPC.Entity.MaxHealth;
@@ -85,6 +84,7 @@ namespace HealthBarMod
                     hitNPC = null;
                     init = false;
                     OnKill();
+                    Components.Remove(this);
 
                 }
 
@@ -100,14 +100,6 @@ namespace HealthBarMod
         }
         void LoadTextures()
         {
-            //switch (hitNPC.Entity.Team)
-            //{
-            //    case MobileTeams.Undead:
-            //    case MobileTeams:
-            //        healthTextName = "BloodHP(dags).png";
-            //        backTextName = "BloodHP(dags)_BD.png";
-            //        break;
-            //}
             if (!hitNPC || hitNPC.Entity.Team != MobileTeams.Undead)
             {
                 healthTextName = "BloodHP(dags).png";
@@ -120,11 +112,11 @@ namespace HealthBarMod
             }
             if (!TextureReplacement.TryImportImage(healthTextName, true, out healthTexture))
             {
-                Debug.LogError("TravelOptions: Unable to load the base UI image.");
+                Debug.LogError("HealthBar: Unable to load the base UI image.");
             }
             if (!TextureReplacement.TryImportImage(backTextName, true, out backTexture))
             {
-                Debug.LogError("TravelOptions: Unable to load the base UI image.");
+                Debug.LogError("HealthBar: Unable to load the base UI image.");
             }
 
             healthTexture = Crop(healthTexture);
@@ -140,9 +132,8 @@ namespace HealthBarMod
         void TimeUpdate()
         {
             if (timer > 0)
-            {
                 timer -= Time.deltaTime;
-            }
+
             if (timerReset)
             {
                 timer = 15;
@@ -208,23 +199,18 @@ namespace HealthBarMod
 
             DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
             scale = SetScale(scaleSettings);
-            size.x = texture.width;
-            size.y = texture.height;
             scaleVec = new Vector2(0, scale);
 
-            //scaleVec = new Vector2(hud.HUDCompass.Size.x, 0);  For the compass location. Make a switch case later once you've put in the code for the Mod Settings.
-
-            float x = size.x / size.y;
-            scaleVec.x = scaleVec.y * x;
+            //scale the size of the nativepanel to the equivalent size of the parentpanel.
+            float i = texture.width / texture.height;
+            scaleVec.x = scaleVec.y * i;
             panel.Scale = DaggerfallUI.Instance.DaggerfallHUD.NativePanel.LocalScale;
-            scaleVec *= panel.Scale;
-            size = scaleVec;
+            panel.Size = scaleVec * panel.Scale;
 
             //create the health bar
-            panel.Size = size;
             panel.BackgroundColor = Color.clear;
             panel.HorizontalAlignment = HorizontalAlignment.Center;
-            panel.VerticalAlignment = VerticalAlignment.None;
+            panel.VerticalAlignment = VerticalAlignment.Bottom;
             panel.Position = new Vector2(hud.ParentPanel.Size.x - panel.Size.x, hud.ParentPanel.Size.y - panel.Size.y - (10 * hud.NativePanel.Scale.y));
 
             return panel;
