@@ -53,15 +53,11 @@ public class EntityHitRegister : WeaponManager
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
 
         //check for physical attacks
-        if (Physics.SphereCast(ray, SphereCastRadius, out hit,ScreenWeapon.Reach, playerLayerMask))
+        if (Physics.SphereCast(ray, SphereCastRadius, out hit, ScreenWeapon.Reach, playerLayerMask))
         {
             hitNPC = hit.transform.GetComponent<DaggerfallEntityBehaviour>();
-            //grabs the EntityBehaviour of the enemy in the location that was attacked
 
-
-
-            //if (ScreenWeapon.GetCurrentFrame() == ScreenWeapon.GetHitFrame() && hitNPC)
-                EnemyCheck();
+            EnemyCheck();
         }
     }
 

@@ -6,6 +6,7 @@ using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Utility.AssetInjection;
 using DaggerfallWorkshop.Game.Entity;
+using DaggerfallConnect;
 
 namespace HealthBarMod
 {
@@ -19,28 +20,27 @@ namespace HealthBarMod
         Texture2D healthTexture = Texture2D.whiteTexture;
         Texture2D backTexture = Texture2D.whiteTexture;
 
-        Vector2 healthSize = Vector2.zero;
-        Vector2 backSize = Vector2.zero;
-
         bool init = false;
         string healthTextName;
         string backTextName;
         private float timer = 15;
         public bool timerReset = false;
-        public const int borderSize = 10;
 
-        
+
         Vector2 scaleVec;
         float scale;
         public int scaleSettings;
         public int loc;
+        public int scaleOffset = 0;
+
+        public Vector2 offset = new Vector2(0, 10);
 
 
 
         public HealthBar()
-            :base()
-        { 
-            
+            : base()
+        {
+
             Back = new Panel();
             Health = new HorizontalProgress();
 
@@ -48,10 +48,6 @@ namespace HealthBarMod
             LoadTextures();
             PanelSetup();
 
-            SetMargins(Margins.All, borderSize);
-            
-            Components.Add(Back);
-            Components.Add(Health);
 
         }
 
@@ -59,39 +55,39 @@ namespace HealthBarMod
 
         public override void Update()
         {
-            
+
             if (hitNPC)
             {
-                float healthPercent = hitNPC.Entity.CurrentHealth / (float) hitNPC.Entity.MaxHealth;
+                float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
+                Health.Amount = healthPercent;
                 if (!init)
                 {
-                    Health.Amount = healthPercent;
                     LoadTextures();
                     PanelSetup();
                     init = true;
+                    Components.Add(Back);
+                    Components.Add(Health);
                 }
-                else
-                {
-                    Health.Amount = healthPercent;
-                }
-                if (Health.Amount == 0
-                    || GameManager.Instance.PlayerDeath.DeathInProgress
-                    || !hitNPC.gameObject.activeSelf
-                    || timer <= 0
-                    || GameManager.Instance.PlayerEntity.IsResting
-                    || (!GameManager.Instance.IsPlayingGame() && GameManager.Instance.StateManager.CurrentState != StateManager.StateTypes.UI))
-                {
-                    hitNPC = null;
-                    init = false;
-                    OnKill();
-                    Components.Remove(this);
-
-                }
+          
 
 
 
                 TimeUpdate();
                 base.Update();
+            }
+
+            if (Health.Amount == 0
+              || GameManager.Instance.PlayerDeath.DeathInProgress
+              || !hitNPC
+              || timer <= 0
+              || GameManager.Instance.PlayerEntity.IsResting
+              || (!GameManager.Instance.IsPlayingGame() && GameManager.Instance.StateManager.CurrentState != StateManager.StateTypes.UI))
+            {
+                hitNPC = null;
+                init = false;
+                Components.Remove(Back);
+                Components.Remove(Health);
+
             }
         }
         public override void Draw()
@@ -120,12 +116,7 @@ namespace HealthBarMod
             }
 
             healthTexture = Crop(healthTexture);
-            healthSize = new Vector2(healthTexture.width, healthTexture.height);
             backTexture = Crop(backTexture);
-            backSize = new Vector2(backTexture.width, backTexture.height);
-
-
-
         }
 
 
@@ -140,23 +131,23 @@ namespace HealthBarMod
                 timerReset = false;
             }
         }
-        void PanelSetup()
+        public void PanelSetup()
         {
             switch (loc)
             {
                 case 0:
-                    
+
                     //scale for use with NativePanel
 
-                    SetPanel(Health, healthSize, healthTexture);
-                    SetPanel(Back, backSize, backTexture);
+                    SetPanel(Health, healthTexture);
+                    SetPanel(Back, backTexture);
                     Health.ProgressTexture = healthTexture;
                     Back.BackgroundTexture = backTexture;
                     break;
 
                 case 1:
-                    SetPanel(Health, healthSize, healthTexture);
-                    SetPanel(Back, backSize, backTexture);
+                    SetPanel(Health, healthTexture);
+                    SetPanel(Back, backTexture);
                     Health.ProgressTexture = healthTexture;
                     Back.BackgroundTexture = backTexture;
                     break;
@@ -194,35 +185,28 @@ namespace HealthBarMod
             return scale;
         }
 
-        private BaseScreenComponent SetPanel(BaseScreenComponent panel, Vector2 size, Texture2D texture)
+        private BaseScreenComponent SetPanel(BaseScreenComponent panel,Texture2D texture)
         {
 
             DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
-            scale = SetScale(scaleSettings);
+            scale = SetScale(scaleSettings) + scaleOffset;
             scaleVec = new Vector2(0, scale);
 
             //scale the size of the nativepanel to the equivalent size of the parentpanel.
-            float i = texture.width / texture.height;
-            scaleVec.x = scaleVec.y * i;
+            float textureRatio = texture.width / texture.height;
+            scaleVec.x = scaleVec.y * textureRatio;
             panel.Scale = DaggerfallUI.Instance.DaggerfallHUD.NativePanel.LocalScale;
             panel.Size = scaleVec * panel.Scale;
 
+            Vector2 offsetResize = offset * DaggerfallUI.Instance.DaggerfallHUD.NativePanel.LocalScale;
+
             //create the health bar
             panel.BackgroundColor = Color.clear;
-            panel.HorizontalAlignment = HorizontalAlignment.Center;
-            panel.VerticalAlignment = VerticalAlignment.Bottom;
-            panel.Position = new Vector2(hud.ParentPanel.Size.x - panel.Size.x, hud.ParentPanel.Size.y - panel.Size.y - (10 * hud.NativePanel.Scale.y));
+            panel.HorizontalAlignment = HorizontalAlignment.None;
+            panel.VerticalAlignment = VerticalAlignment.None;
+            panel.Position = new Vector2((hud.ParentPanel.Size.x/2) - (panel.Size.x/2) + offsetResize.x, hud.ParentPanel.Size.y - panel.Size.y - offsetResize.y);
 
             return panel;
-;
-        }
-
-        public delegate void KillEventHandler();
-        public static event KillEventHandler Kill;
-
-        private void OnKill()
-        {
-            Kill?.Invoke();
         }
 
     }

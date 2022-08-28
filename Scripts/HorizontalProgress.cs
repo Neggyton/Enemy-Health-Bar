@@ -61,7 +61,6 @@ namespace DaggerfallWorkshop.Game.UserInterface
             double x = 0.5;
             Rect srcRect = new Rect((float)x - (amount / 2), 0, amount, 1);
             Rect dstRect = Rectangle;
-            Debug.Log("look at this one first " + dstRect);
             float scaledAmount = Mathf.Round(dstRect.width / 2 * amount);
             dstRect.x += dstRect.width / 2 - scaledAmount;
             dstRect.width = dstRect.width / 2 + scaledAmount - (dstRect.width / 2 - scaledAmount);
