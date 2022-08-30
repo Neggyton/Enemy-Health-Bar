@@ -3,7 +3,7 @@
 	"Sections": [
 		{
 			"Name": "Health Bar Size",
-			"Description": "Configures the size of the Health Bar",
+			"Description": "Presets that configure the size of the Health Bar",
 			"IsAdvanced": false,
 			"Keys": [
 				{
@@ -20,8 +20,23 @@
 					"$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.MultipleChoiceKey"
 				
 				}
-			]	
-			
+			],
+            "$version": "v1"
+        },
+        {
+            "Name": "Advanced Location Positioning and Scaling",
+            "Description": "If activated, hit Enter while in-game to change the settings of the bar",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": false,
+                    "Name": "Enabled",
+                    "Description": null,
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
 		}
 	]
 		

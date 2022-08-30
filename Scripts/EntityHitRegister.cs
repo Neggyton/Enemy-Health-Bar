@@ -75,6 +75,11 @@ public class EntityHitRegister : WeaponManager
 
     }
 
+    private void Countdown()
+    {
+        timer -= Time.deltaTime;
+    }
+
     public void EnemyCheck()
     {
         if (!hitNPC)
@@ -88,15 +93,12 @@ public class EntityHitRegister : WeaponManager
         }
     }
 
-    public delegate DaggerfallEntityBehaviour TargetNPCEventHandler(DaggerfallEntityBehaviour target);
+    public delegate void TargetNPCEventHandler(DaggerfallEntityBehaviour target);
     public static event TargetNPCEventHandler TargetNPC;
     protected virtual void OnTargetNPC(DaggerfallEntityBehaviour target)
     {
         TargetNPC?.Invoke(target);
     }
 
-    private void Countdown()
-    {
-        timer -= Time.deltaTime;
-    }
+ 
 }

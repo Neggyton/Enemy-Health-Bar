@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game;
+using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 public class HealthBarSettings
 {
@@ -17,7 +18,7 @@ public class HealthBarSettings
     {
 
         Vector2 multiplier = new Vector2(1,1);
-        if (InputManager.Instance.GetKey(KeyCode.LeftShift))
+        if (InputManager.Instance.GetKey(KeyCode.LeftShift) || InputManager.Instance.GetKey(KeyCode.RightShift))
             multiplier = 10 * scale;
         switch (InputManager.Instance.GetAnyKeyDown())
         {
@@ -42,10 +43,10 @@ public class HealthBarSettings
 
         switch (InputManager.Instance.GetAnyKeyDown())
         {
-            case (KeyCode.Alpha9):
+            case (KeyCode.Minus):
                 scaleOffset -= 1;
                 break;
-            case (KeyCode.Alpha0):
+            case (KeyCode.Equals):
                 scaleOffset += 1;
                 break;
         }
@@ -53,4 +54,18 @@ public class HealthBarSettings
         return scaleOffset;
     }
 
+    public void MessageBox()
+    {
+        DaggerfallMessageBox tempInfoBox = new DaggerfallMessageBox(DaggerfallUI.UIManager);
+        tempInfoBox.PauseWhileOpen = true;
+        tempInfoBox.AllowCancel = false;
+        tempInfoBox.ClickAnywhereToClose = true;
+        tempInfoBox.ParentPanel.BackgroundColor = Color.clear;
+    
+    string[] message = new string[] {"Welcome to the Enemy Health Bar settings.", "Use the Arrow keys to move the health bar around.", "You can move the bar around faster by holding down Shift.", "Press the '-' and '=' keys to change the size of the bar.",
+            "Press the Delete key to reset the position of the bar.", "Your options will automatically be saved; press the '.' key again to exit this menu.", "Your settings will be loaded even if the Advanced setting is turned off in the mod options."};
+        tempInfoBox.SetText(message);
+        DaggerfallUI.UIManager.PushWindow(tempInfoBox);
+
+    }
 }

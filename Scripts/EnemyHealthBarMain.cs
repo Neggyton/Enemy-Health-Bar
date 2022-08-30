@@ -26,6 +26,11 @@ namespace HealthBarMod
         ModSettings settings;
         HealthBarSettings barSettings;
 
+        private bool advancedSettings;
+
+        bool activated = false;
+
+
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -39,25 +44,26 @@ namespace HealthBarMod
             mod.IsReady = true;
         }
 
-        private void Start()
+        public EnemyHealthBarMain()
         {
-
-            mod.IsReady = true;
-            settings = mod.GetSettings();
 
             EntityHitRegister.TargetNPC += OnTargetNPC;
             SaveLoadManager.OnLoad += RaiseOnLoadEvent;
+        }
 
-            healthBar = new HealthBar();
+        private void Start()
+        {
+            settings = mod.GetSettings();
+            advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
+
+            healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
+
+            healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
             healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.LocalScale;
             healthBar.Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
-            healthBar.loc = 0; //settings.GetValue<int>("Location", "BarLocation");
-            healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
             healthBar.AutoSize = AutoSizeModes.ScaleToFit;
             healthBar.Parent = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel;
-
             barSettings = new HealthBarSettings();
-
             DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(healthBar);
         }
 
@@ -67,44 +73,58 @@ namespace HealthBarMod
                 if (healthBar.hitNPC)
                     healthBar.Update();
 
-            if (InputManager.Instance.GetKeyDown(KeyCode.X))
+
+            if (advancedSettings)
+                BarSetting();
+        }
+
+        private void BarSetting()
+        {
+            
+            if (InputManager.Instance.GetKeyDown(KeyCode.Period))
             {
-                switch (healthBar.hitNPC != null)
+                activated = !activated;
+                switch (activated)
                 {
-                    case (true):
+                    case true:
+                        healthBar.hitNPC = GameManager.Instance.PlayerEntityBehaviour;
+                        barSettings.MessageBox();
+                        break;
+                    case false:
                         healthBar.hitNPC = null;
                         break;
-                    case (false):
-                        healthBar.hitNPC = GameManager.Instance.PlayerEntityBehaviour;
-                        break;
                 }
-
-                Debug.Log(healthBar.hitNPC);
             }
 
-            healthBar.offset = barSettings.NewPos(healthBar.offset);
-            healthBar.scaleOffset = barSettings.NewScale(healthBar.scaleOffset);
-            Debug.Log(healthBar.scaleOffset);
-            healthBar.PanelSetup();
-            healthBar.timerReset = true;
+            if (activated)
+            {
+                if (InputManager.Instance.GetKeyDown(KeyCode.Delete))
+                {
+                    healthBar.offset = new Vector2(0, 2);
+                    healthBar.scaleOffset = healthBar.scaleSettings;
+                }
+
+                healthBar.offset = barSettings.NewPos(healthBar.offset);
+                healthBar.scaleOffset = barSettings.NewScale(healthBar.scaleOffset);
+                healthBar.PanelSetup();
+                healthBar.timerReset = true;
+
+                PlayerPrefs.SetFloat("BarPositionX", healthBar.offset.x);
+                PlayerPrefs.SetFloat("BarPositionY", healthBar.offset.y);
+                PlayerPrefs.SetInt("BarScale", healthBar.scaleOffset);
+                PlayerPrefs.Save();
+
+
+            }
         }
 
-        private void OnGUI()
-        {
-            if (GameManager.Instance.IsPlayingGame() && healthBar != null)
-                if (healthBar.hitNPC)
-                    healthBar.Draw();
-        }
-
-        public DaggerfallEntityBehaviour OnTargetNPC(DaggerfallEntityBehaviour target)
+        public void OnTargetNPC(DaggerfallEntityBehaviour target)
         {
             healthBar.timerReset = true;
             if (target != healthBar.hitNPC)
             {
                 healthBar.hitNPC = target;
-                return healthBar.hitNPC;
             }
-            return healthBar.hitNPC;
         }
 
         public void RaiseOnLoadEvent(SaveData_v1 saveData)

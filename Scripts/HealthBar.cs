@@ -30,17 +30,15 @@ namespace HealthBarMod
         Vector2 scaleVec;
         float scale;
         public int scaleSettings;
-        public int loc;
         public int scaleOffset = 0;
 
-        public Vector2 offset = new Vector2(0, 10);
+        public Vector2 offset = new Vector2(0,2);
 
 
 
-        public HealthBar()
+        public HealthBar(Vector2 offsetLoad, int scaleOffsetLoad)
             : base()
         {
-
             Back = new Panel();
             Health = new HorizontalProgress();
 
@@ -48,15 +46,17 @@ namespace HealthBarMod
             LoadTextures();
             PanelSetup();
 
-
+            offset = offsetLoad;
+            scaleOffset = scaleOffsetLoad;
         }
 
 
 
         public override void Update()
         {
+            if (!hitNPC)
+                return;
 
-            if (hitNPC)
             {
                 float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
                 Health.Amount = healthPercent;
@@ -68,10 +68,6 @@ namespace HealthBarMod
                     Components.Add(Back);
                     Components.Add(Health);
                 }
-          
-
-
-
                 TimeUpdate();
                 base.Update();
             }
@@ -92,6 +88,9 @@ namespace HealthBarMod
         }
         public override void Draw()
         {
+            if (!hitNPC)
+                return;
+
             base.Draw();
         }
         void LoadTextures()
@@ -133,25 +132,10 @@ namespace HealthBarMod
         }
         public void PanelSetup()
         {
-            switch (loc)
-            {
-                case 0:
-
-                    //scale for use with NativePanel
-
-                    SetPanel(Health, healthTexture);
-                    SetPanel(Back, backTexture);
-                    Health.ProgressTexture = healthTexture;
-                    Back.BackgroundTexture = backTexture;
-                    break;
-
-                case 1:
-                    SetPanel(Health, healthTexture);
-                    SetPanel(Back, backTexture);
-                    Health.ProgressTexture = healthTexture;
-                    Back.BackgroundTexture = backTexture;
-                    break;
-            }
+            SetPanel(Health, healthTexture);
+            SetPanel(Back, backTexture);
+            Health.ProgressTexture = healthTexture;
+            Back.BackgroundTexture = backTexture;
         }
 
         private Texture2D Crop(Texture2D crop)
@@ -165,7 +149,6 @@ namespace HealthBarMod
 
         private float SetScale(int scaleSettings)
         {
-            scaleSettings = 1;
             switch (scaleSettings)
             {
                 case 0:
