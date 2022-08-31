@@ -48,7 +48,6 @@ public class EntityHitRegister : WeaponManager
 
     public void PhysCheck(DaggerfallMissile missile)
     {
-
         RaycastHit hit;
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
 

@@ -7,6 +7,7 @@ using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.UserInterface;
+using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 
 
 namespace HealthBarMod
@@ -53,6 +54,7 @@ namespace HealthBarMod
 
         private void Start()
         {
+            
             settings = mod.GetSettings();
             advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
 
@@ -124,7 +126,9 @@ namespace HealthBarMod
             if (target != healthBar.hitNPC)
             {
                 healthBar.hitNPC = target;
+
             }
+
         }
 
         public void RaiseOnLoadEvent(SaveData_v1 saveData)
@@ -135,5 +139,6 @@ namespace HealthBarMod
                 healthBar.Update();
             }
         }
+
     }
 }

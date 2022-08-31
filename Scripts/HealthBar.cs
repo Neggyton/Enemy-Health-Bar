@@ -48,6 +48,10 @@ namespace HealthBarMod
 
             offset = offsetLoad;
             scaleOffset = scaleOffsetLoad;
+
+
+            Components.Add(Back);
+            Components.Add(Health);
         }
 
 
@@ -65,8 +69,6 @@ namespace HealthBarMod
                     LoadTextures();
                     PanelSetup();
                     init = true;
-                    Components.Add(Back);
-                    Components.Add(Health);
                 }
                 TimeUpdate();
                 base.Update();
@@ -81,9 +83,6 @@ namespace HealthBarMod
             {
                 hitNPC = null;
                 init = false;
-                Components.Remove(Back);
-                Components.Remove(Health);
-
             }
         }
         public override void Draw()
@@ -114,8 +113,6 @@ namespace HealthBarMod
                 Debug.LogError("HealthBar: Unable to load the base UI image.");
             }
 
-            healthTexture = Crop(healthTexture);
-            backTexture = Crop(backTexture);
         }
 
 
@@ -136,15 +133,6 @@ namespace HealthBarMod
             SetPanel(Back, backTexture);
             Health.ProgressTexture = healthTexture;
             Back.BackgroundTexture = backTexture;
-        }
-
-        private Texture2D Crop(Texture2D crop)
-        {
-            Color[] c = crop.GetPixels(67, 0, 378, 40);
-            crop = new Texture2D(378, 40);
-            crop.SetPixels(c);
-            crop.Apply();
-            return crop;
         }
 
         private float SetScale(int scaleSettings)

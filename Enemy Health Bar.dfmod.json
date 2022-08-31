@@ -10,15 +10,8 @@
         "Assets/Game/Mods/Enemy-Health-Bar/Scripts/HealthBar.cs",
         "Assets/Game/Mods/Enemy-Health-Bar/Scripts/EnemyHealthBarMain.cs",
         "Assets/Game/Mods/Enemy-Health-Bar/Scripts/HorizontalProgress.cs",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/UndeadHP_purple(daggers).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/EnemyHP_bloodRed-50percentHPexample(daggers).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/BloodHP(dags)_BD.png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/EnemyHP_bloodRed-BACKDROP(daggers).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/Background.png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/HealthBar2.png",
+        "Assets/Game/Mods/Enemy-Health-Bar/Scripts/HealthBarSettings.cs",
         "Assets/Game/Mods/Enemy-Health-Bar/Textures/BloodHP(dags).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/UndeadHP_purple-BACKDROP(daggers).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/EnemyHP_bloodRed(daggers).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Scripts/HealthBarSettings.cs"
+        "Assets/Game/Mods/Enemy-Health-Bar/Textures/BloodHP(dags)_BD.png"
     ]
 }
