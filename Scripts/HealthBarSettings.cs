@@ -8,7 +8,12 @@ using DaggerfallWorkshop.Game.UserInterfaceWindows;
 public class HealthBarSettings
 {
     Vector2 scale = DaggerfallUI.Instance.DaggerfallHUD.NativePanel.Scale;
+    DaggerfallMessageBox tempInfoBox = new DaggerfallMessageBox(DaggerfallUI.UIManager);
 
+    public HealthBarSettings()
+    {
+        tempInfoBox.OnClose += OnClose;
+    }
     public void HealthBarPosition(Panel bar, Vector2 offset)
     {
         bar.Position = bar.Position + offset;
@@ -18,54 +23,62 @@ public class HealthBarSettings
     {
 
         Vector2 multiplier = new Vector2(1,1);
-        if (InputManager.Instance.GetKey(KeyCode.LeftShift) || InputManager.Instance.GetKey(KeyCode.RightShift))
-            multiplier = 10 * scale;
-        switch (InputManager.Instance.GetAnyKeyDown())
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
-            case (KeyCode.UpArrow):
-                newOffset.y += multiplier.y;
-                break;
-            case (KeyCode.DownArrow):
-                newOffset.y -= multiplier.y;
-                break;
-            case (KeyCode.RightArrow):
-                newOffset.x += multiplier.x;
-                break;
-            case (KeyCode.LeftArrow):
-                newOffset.x -= multiplier.x;
-                break;
+            if (Input.GetKeyDown(KeyCode.W))
+                newOffset.y++;
+            else if (Input.GetKeyDown(KeyCode.S))
+                newOffset.y--;
+            if (Input.GetKeyDown(KeyCode.D))
+                newOffset.x++;
+            else if (Input.GetKeyDown(KeyCode.A))
+                newOffset.x--;
         }
+        else
+        {
+            if (Input.GetKey(KeyCode.W))
+                newOffset.y++;
+            else if (Input.GetKey(KeyCode.S))
+                newOffset.y--;
+            if (Input.GetKey(KeyCode.D))
+                newOffset.x++;
+            else if (Input.GetKey(KeyCode.A))
+                newOffset.x--;
+        }
+            
+       
+        
+
         return newOffset;
     }
 
     public int NewScale(int scaleOffset)
     {
 
-        switch (InputManager.Instance.GetAnyKeyDown())
-        {
-            case (KeyCode.Minus):
-                scaleOffset -= 1;
-                break;
-            case (KeyCode.Equals):
-                scaleOffset += 1;
-                break;
-        }
+        if (Input.GetKeyDown(KeyCode.Q))
+            scaleOffset--;
+        else if (Input.GetKeyDown(KeyCode.E))
+            scaleOffset++;
+        
 
         return scaleOffset;
     }
 
     public void MessageBox()
     {
-        DaggerfallMessageBox tempInfoBox = new DaggerfallMessageBox(DaggerfallUI.UIManager);
         tempInfoBox.PauseWhileOpen = true;
         tempInfoBox.AllowCancel = false;
         tempInfoBox.ClickAnywhereToClose = true;
         tempInfoBox.ParentPanel.BackgroundColor = Color.clear;
     
-    string[] message = new string[] {"Welcome to the Enemy Health Bar settings.", "Use the Arrow keys to move the health bar around.", "You can move the bar around faster by holding down Shift.", "Press the '-' and '=' keys to change the size of the bar.",
-            "Press the Delete key to reset the position of the bar.", "Your options will automatically be saved; press the '.' key again to exit this menu.", "Your settings will be loaded even if the Advanced setting is turned off in the mod options."};
+    string[] message = new string[] {"Welcome to the Enemy Health Bar settings.", "Use WASD to move the health bar around.", "You can move the bar around more precisely by holding down Shift.", "Use Q and E to change the size of the bar.",
+            "Press the Spacebar to reset the position of the bar.", "Your options will automatically be saved; press the '.' (Period) key again to exit this menu.", "When finished, uncheck 'Advanced Location Positioning and Scaling' from the Mod Settings page."};
         tempInfoBox.SetText(message);
         DaggerfallUI.UIManager.PushWindow(tempInfoBox);
+    }
 
+    public void OnClose()
+    {
+        InputManager.Instance.enabled = false;
     }
 }

@@ -25,7 +25,7 @@
         },
         {
             "Name": "Advanced Location Positioning and Scaling",
-            "Description": "If activated, hit Enter while in-game to change the settings of the bar",
+            "Description": "If enabled, press '.' (Period) while in-game to change the settings of the bar",
             "IsAdvanced": false,
             "Keys": [
                 {

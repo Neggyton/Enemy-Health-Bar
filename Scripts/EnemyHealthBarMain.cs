@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
@@ -8,7 +9,8 @@ using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
-
+using DaggerfallWorkshop.Utility.AssetInjection;
+using System.IO;
 
 namespace HealthBarMod
 {
@@ -47,19 +49,16 @@ namespace HealthBarMod
 
         public EnemyHealthBarMain()
         {
-
             EntityHitRegister.TargetNPC += OnTargetNPC;
             SaveLoadManager.OnLoad += RaiseOnLoadEvent;
         }
 
         private void Start()
         {
-            
             settings = mod.GetSettings();
             advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
 
             healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
-
             healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
             healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.LocalScale;
             healthBar.Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
@@ -71,9 +70,7 @@ namespace HealthBarMod
 
         private void Update()
         {
-            if (GameManager.Instance.IsPlayingGame() && healthBar != null)
-                if (healthBar.hitNPC)
-                    healthBar.Update();
+            healthBar.Update();
 
 
             if (advancedSettings)
@@ -83,7 +80,7 @@ namespace HealthBarMod
         private void BarSetting()
         {
             
-            if (InputManager.Instance.GetKeyDown(KeyCode.Period))
+            if (Input.GetKeyDown(KeyCode.Period))
             {
                 activated = !activated;
                 switch (activated)
@@ -94,13 +91,16 @@ namespace HealthBarMod
                         break;
                     case false:
                         healthBar.hitNPC = null;
+                        InputManager.Instance.enabled = true;
                         break;
                 }
             }
 
+            
+
             if (activated)
             {
-                if (InputManager.Instance.GetKeyDown(KeyCode.Delete))
+                if (Input.GetKeyDown(KeyCode.Space))
                 {
                     healthBar.offset = new Vector2(0, 2);
                     healthBar.scaleOffset = healthBar.scaleSettings;
