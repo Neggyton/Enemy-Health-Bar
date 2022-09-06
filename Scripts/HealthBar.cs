@@ -42,7 +42,7 @@ namespace HealthBarMod
             Back = new Panel();
             Health = new HorizontalProgress();
 
-
+            
             LoadTextures();
             PanelSetup();
 
@@ -52,6 +52,8 @@ namespace HealthBarMod
 
             Components.Add(Back);
             Components.Add(Health);
+
+            
         }
 
 
@@ -61,18 +63,16 @@ namespace HealthBarMod
             if (!hitNPC)
                 return;
 
+            float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
+            Health.Amount = healthPercent;
+            if (!init)
             {
-                float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
-                Health.Amount = healthPercent;
-                if (!init)
-                {
-                    LoadTextures();
-                    PanelSetup();
-                    init = true;
-                }
-                TimeUpdate();
-                base.Update();
+                LoadTextures();
+                PanelSetup();
+                init = true;
             }
+            TimeUpdate();
+            base.Update();
 
             if (Health.Amount == 0
               || GameManager.Instance.PlayerDeath.DeathInProgress

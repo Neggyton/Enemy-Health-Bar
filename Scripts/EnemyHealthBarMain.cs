@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using DaggerfallConnect;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
@@ -11,6 +13,7 @@ using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using DaggerfallWorkshop.Utility.AssetInjection;
 using System.IO;
+using DaggerfallWorkshop.Utility;
 
 namespace HealthBarMod
 {
@@ -34,6 +37,7 @@ namespace HealthBarMod
         bool activated = false;
 
 
+        Texture2D test;
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -55,8 +59,11 @@ namespace HealthBarMod
 
         private void Start()
         {
+            
             settings = mod.GetSettings();
             advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
+
+            LookUpTable test = new LookUpTable();
 
             healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
             healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
@@ -126,7 +133,6 @@ namespace HealthBarMod
             if (target != healthBar.hitNPC)
             {
                 healthBar.hitNPC = target;
-
             }
 
         }
@@ -137,8 +143,8 @@ namespace HealthBarMod
             {
                 healthBar.hitNPC = null;
                 healthBar.Update();
+
             }
         }
-
     }
 }

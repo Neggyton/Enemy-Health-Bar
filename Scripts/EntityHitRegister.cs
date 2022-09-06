@@ -17,6 +17,7 @@ public class EntityHitRegister : WeaponManager
     // Start is called before the first frame update
     void Start()
     {
+        
         mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         playerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
         ScreenWeapon = GameManager.Instance.WeaponManager.ScreenWeapon;
@@ -26,6 +27,7 @@ public class EntityHitRegister : WeaponManager
     // Update is called once per frame
     void Update()
     {
+        
         if (timer > 0)
         {
             Countdown();
