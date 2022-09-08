@@ -61,18 +61,17 @@ namespace HealthBarMod
             if (!hitNPC)
                 return;
 
+            float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
+            Health.Amount = healthPercent;
+            if (!init)
             {
-                float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
-                Health.Amount = healthPercent;
-                if (!init)
-                {
-                    LoadTextures();
-                    PanelSetup();
-                    init = true;
-                }
-                TimeUpdate();
-                base.Update();
+                Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
+                LoadTextures();
+                PanelSetup();
+                init = true;
             }
+            TimeUpdate();
+            base.Update();
 
             if (Health.Amount == 0
               || GameManager.Instance.PlayerDeath.DeathInProgress
@@ -158,6 +157,7 @@ namespace HealthBarMod
 
         private BaseScreenComponent SetPanel(BaseScreenComponent panel,Texture2D texture)
         {
+            
 
             DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
             scale = SetScale(scaleSettings) + scaleOffset;

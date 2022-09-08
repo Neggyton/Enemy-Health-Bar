@@ -59,17 +59,21 @@ namespace HealthBarMod
             advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
 
             healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
-            healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
-            healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.LocalScale;
-            healthBar.Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
-            healthBar.AutoSize = AutoSizeModes.ScaleToFit;
             healthBar.Parent = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel;
+            healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
+            healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Scale;
+            healthBar.AutoSize = AutoSizeModes.ScaleToFit;
+
             barSettings = new HealthBarSettings();
+
             DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(healthBar);
         }
 
         private void Update()
         {
+            
+
+
             healthBar.Update();
 
 
