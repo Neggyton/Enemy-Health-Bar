@@ -43,8 +43,8 @@ namespace HealthBarMod
             Health = new HorizontalProgress();
 
             
-            LoadTextures();
-            PanelSetup();
+            //LoadTextures();
+            //PanelSetup();
 
             offset = offsetLoad;
             scaleOffset = scaleOffsetLoad;
@@ -94,24 +94,14 @@ namespace HealthBarMod
         }
         void LoadTextures()
         {
-            if (!hitNPC || hitNPC.Entity.Team != MobileTeams.Undead)
-            {
-                healthTextName = "BloodHP(dags).png";
-                backTextName = "BloodHP(dags)_BD.png";
-            }
-            else
-            {
-                healthTextName = "BloodHP(dags).png";
-                backTextName = "BloodHP(dags)_BD.png";
-            }
-            if (!TextureReplacement.TryImportImage(healthTextName, true, out healthTexture))
-            {
-                Debug.LogError("HealthBar: Unable to load the base UI image.");
-            }
-            if (!TextureReplacement.TryImportImage(backTextName, true, out backTexture))
-            {
-                Debug.LogError("HealthBar: Unable to load the base UI image.");
-            }
+            Texture2D[] test = new Texture2D[2];
+            if(LookUpTable.enemyDict.TryGetValue(hitNPC.Entity.Name, out test)){
+
+            healthTexture = test[0];
+            backTexture = test[1];
+            } else
+                Debug.Log("could not load texture");
+            
 
         }
 
@@ -163,6 +153,8 @@ namespace HealthBarMod
             scale = SetScale(scaleSettings) + scaleOffset;
             scaleVec = new Vector2(0, scale);
 
+            //TODO: bug fixes right here
+            
             //scale the size of the nativepanel to the equivalent size of the parentpanel.
             float textureRatio = texture.width / texture.height;
             scaleVec.x = scaleVec.y * textureRatio;

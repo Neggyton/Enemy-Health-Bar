@@ -11,7 +11,8 @@
         "Assets/Game/Mods/Enemy-Health-Bar/Scripts/EnemyHealthBarMain.cs",
         "Assets/Game/Mods/Enemy-Health-Bar/Scripts/HorizontalProgress.cs",
         "Assets/Game/Mods/Enemy-Health-Bar/Scripts/HealthBarSettings.cs",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/BloodHP(dags).png",
-        "Assets/Game/Mods/Enemy-Health-Bar/Textures/BloodHP(dags)_BD.png"
+        "Assets/Game/Mods/Enemy-Health-Bar/Scripts/LookUpTable.cs",
+        "Assets/Game/Mods/Enemy-Health-Bar/Textures/default_hb.png",
+        "Assets/Game/Mods/Enemy-Health-Bar/Textures/default_bd.png"
     ]
 }

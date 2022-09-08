@@ -28,7 +28,7 @@ namespace HealthBarMod
         public int location { get; private set; }
         public int scale { get; private set; }
 
-        HealthBar healthBar = null;
+        HealthBar healthBar;
         ModSettings settings;
         HealthBarSettings barSettings;
 
@@ -36,8 +36,6 @@ namespace HealthBarMod
 
         bool activated = false;
 
-
-        Texture2D test;
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -59,11 +57,10 @@ namespace HealthBarMod
 
         private void Start()
         {
-            
             settings = mod.GetSettings();
             advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
 
-            LookUpTable test = new LookUpTable();
+            LookUpTable.TableCreation();
 
             healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
             healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
