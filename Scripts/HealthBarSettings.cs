@@ -21,7 +21,7 @@ public class HealthBarSettings
 
     public Vector2 NewPos(Vector2 newOffset)
     {
-
+        
         Vector2 multiplier = new Vector2(1,1);
         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
@@ -54,7 +54,6 @@ public class HealthBarSettings
 
     public int NewScale(int scaleOffset)
     {
-
         if (Input.GetKeyDown(KeyCode.Q))
             scaleOffset--;
         else if (Input.GetKeyDown(KeyCode.E))

@@ -43,8 +43,8 @@ namespace HealthBarMod
             Health = new HorizontalProgress();
 
 
-            LoadTextures();
-            PanelSetup();
+            //LoadTextures();
+            //PanelSetup();
 
             offset = offsetLoad;
             scaleOffset = scaleOffsetLoad;
@@ -60,16 +60,22 @@ namespace HealthBarMod
         {
             if (!hitNPC)
                 return;
-
+            
             float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
             Health.Amount = healthPercent;
+
             if (!init)
             {
                 Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
                 LoadTextures();
-                PanelSetup();
+                Health.ProgressTexture = healthTexture;
+                Back.BackgroundTexture = backTexture;
                 init = true;
             }
+            //TODO: Optimize this code here; maybe have SetPanel update based on Size vs HUD.ParentPanel.Size?
+            SetPanel(Health, healthTexture);
+            SetPanel(Back, backTexture);
+
             TimeUpdate();
             base.Update();
 
@@ -84,6 +90,7 @@ namespace HealthBarMod
                 init = false;
             }
         }
+
         public override void Draw()
         {
             if (!hitNPC)
@@ -91,6 +98,7 @@ namespace HealthBarMod
 
             base.Draw();
         }
+
         void LoadTextures()
         {
             if (!hitNPC || hitNPC.Entity.Team != MobileTeams.Undead)
@@ -126,14 +134,6 @@ namespace HealthBarMod
                 timerReset = false;
             }
         }
-        public void PanelSetup()
-        {
-            SetPanel(Health, healthTexture);
-            SetPanel(Back, backTexture);
-            Health.ProgressTexture = healthTexture;
-            Back.BackgroundTexture = backTexture;
-        }
-
         private float SetScale(int scaleSettings)
         {
             switch (scaleSettings)
@@ -158,24 +158,25 @@ namespace HealthBarMod
         private BaseScreenComponent SetPanel(BaseScreenComponent panel,Texture2D texture)
         {
             
-
+            
             DaggerfallHUD hud = DaggerfallUI.Instance.DaggerfallHUD;
+            Size = hud.ParentPanel.Size;
             scale = SetScale(scaleSettings) + scaleOffset;
             scaleVec = new Vector2(0, scale);
 
             //scale the size of the nativepanel to the equivalent size of the parentpanel.
-            float textureRatio = texture.width / texture.height;
+            float textureRatio = (float)texture.width / (float)texture.height;
             scaleVec.x = scaleVec.y * textureRatio;
-            panel.Scale = DaggerfallUI.Instance.DaggerfallHUD.NativePanel.LocalScale;
+            panel.Scale = hud.NativePanel.LocalScale;
             panel.Size = scaleVec * panel.Scale;
 
-            Vector2 offsetResize = offset * DaggerfallUI.Instance.DaggerfallHUD.NativePanel.LocalScale;
+            Vector2 offsetResize = offset * hud.NativePanel.LocalScale;
 
             //create the health bar
             panel.BackgroundColor = Color.clear;
             panel.HorizontalAlignment = HorizontalAlignment.None;
             panel.VerticalAlignment = VerticalAlignment.None;
-            panel.Position = new Vector2((hud.ParentPanel.Size.x/2) - (panel.Size.x/2) + offsetResize.x, hud.ParentPanel.Size.y - panel.Size.y - offsetResize.y);
+            panel.Position = new Vector2((Size.x/2) - (panel.Size.x/2) + offsetResize.x, Size.y - panel.Size.y - offsetResize.y);
 
             return panel;
         }

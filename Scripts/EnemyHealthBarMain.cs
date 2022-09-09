@@ -45,6 +45,7 @@ namespace HealthBarMod
             go.AddComponent<EntityHitRegister>();
 
             mod.IsReady = true;
+            
         }
 
         public EnemyHealthBarMain()
@@ -59,10 +60,10 @@ namespace HealthBarMod
             advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
 
             healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
-            healthBar.Parent = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel;
             healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
-            healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Scale;
-            healthBar.AutoSize = AutoSizeModes.ScaleToFit;
+            healthBar.AutoSize = AutoSizeModes.None;
+            healthBar.VerticalAlignment = VerticalAlignment.Middle;
+            healthBar.HorizontalAlignment = HorizontalAlignment.Center;
 
             barSettings = new HealthBarSettings();
 
@@ -71,11 +72,8 @@ namespace HealthBarMod
 
         private void Update()
         {
-            
-
-
+            Debug.Log(healthBar.Size);
             healthBar.Update();
-
 
             if (advancedSettings)
                 BarSetting();
@@ -84,7 +82,7 @@ namespace HealthBarMod
         private void BarSetting()
         {
             
-            if (Input.GetKeyDown(KeyCode.Period))
+            if (Input.GetKeyDown(KeyCode.Backslash))
             {
                 activated = !activated;
                 switch (activated)
@@ -96,6 +94,7 @@ namespace HealthBarMod
                     case false:
                         healthBar.hitNPC = null;
                         InputManager.Instance.enabled = true;
+                        advancedSettings = !advancedSettings;
                         break;
                 }
             }
@@ -107,12 +106,11 @@ namespace HealthBarMod
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     healthBar.offset = new Vector2(0, 2);
-                    healthBar.scaleOffset = healthBar.scaleSettings;
+                    healthBar.scaleOffset = 0;
                 }
 
                 healthBar.offset = barSettings.NewPos(healthBar.offset);
                 healthBar.scaleOffset = barSettings.NewScale(healthBar.scaleOffset);
-                healthBar.PanelSetup();
                 healthBar.timerReset = true;
 
                 PlayerPrefs.SetFloat("BarPositionX", healthBar.offset.x);
