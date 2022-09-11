@@ -31,7 +31,7 @@ namespace HealthBarMod
 
         private bool advancedSettings;
 
-        bool activated = false;
+        public int activated = 0;
 
 
 
@@ -45,7 +45,7 @@ namespace HealthBarMod
             go.AddComponent<EntityHitRegister>();
 
             mod.IsReady = true;
-            
+
         }
 
         public EnemyHealthBarMain()
@@ -72,7 +72,6 @@ namespace HealthBarMod
 
         private void Update()
         {
-            Debug.Log(healthBar.Size);
             healthBar.Update();
 
             if (advancedSettings)
@@ -81,27 +80,27 @@ namespace HealthBarMod
 
         private void BarSetting()
         {
-            
+
             if (Input.GetKeyDown(KeyCode.Backslash))
             {
-                activated = !activated;
                 switch (activated)
                 {
-                    case true:
+                    case 0:
+                        activated++;
                         healthBar.hitNPC = GameManager.Instance.PlayerEntityBehaviour;
                         barSettings.MessageBox();
                         break;
-                    case false:
+                    case 2:
                         healthBar.hitNPC = null;
+
                         InputManager.Instance.enabled = true;
                         advancedSettings = !advancedSettings;
                         break;
                 }
             }
 
-            
 
-            if (activated)
+            if (activated > 0)
             {
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
@@ -118,8 +117,8 @@ namespace HealthBarMod
                 PlayerPrefs.SetInt("BarScale", healthBar.scaleOffset);
                 PlayerPrefs.Save();
 
-
             }
+
         }
 
         public void OnTargetNPC(DaggerfallEntityBehaviour target)

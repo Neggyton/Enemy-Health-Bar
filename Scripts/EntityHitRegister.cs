@@ -4,6 +4,8 @@ using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Utility;
+using DaggerfallConnect;
+using DaggerfallWorkshop.Game.MagicAndEffects;
 
 public class EntityHitRegister : WeaponManager
 {
@@ -66,10 +68,12 @@ public class EntityHitRegister : WeaponManager
 
     public void MissileCheck(DaggerfallMissile missile)
     {
-        if (missile.Targets.Length == 0)
+        if (missile.IsArrow && missile.Targets.Length > 0)
+            goto Finish;
+        if (missile.Targets.Length == 0 || !(missile.Payload.Settings.Effects[0].Key.Contains("Damage-Health")) || (missile.Targets.Length == 1 && missile.Targets[0].EntityType == EntityTypes.Player))
             return;
-
-        hitNPC = missile.Targets[missile.Targets.Length - 1];
+        Finish:
+        hitNPC = missile.Targets[0].EntityType != EntityTypes.Player ? missile.Targets[0] : missile.Targets[1];
         EnemyCheck();
 
     }
@@ -99,5 +103,5 @@ public class EntityHitRegister : WeaponManager
         TargetNPC?.Invoke(target);
     }
 
- 
+
 }
