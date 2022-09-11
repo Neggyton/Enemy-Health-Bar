@@ -34,7 +34,7 @@ namespace HealthBarMod
 
         private bool advancedSettings;
 
-        bool activated = false;
+        public int activated = 0;
 
 
         [Invoke(StateManager.StateTypes.Start, 0)]
@@ -47,6 +47,7 @@ namespace HealthBarMod
             go.AddComponent<EntityHitRegister>();
 
             mod.IsReady = true;
+
         }
 
         public EnemyHealthBarMain()
@@ -64,11 +65,12 @@ namespace HealthBarMod
 
             healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
             healthBar.scaleSettings = settings.GetValue<int>("Health Bar Size", "BarSize");
-            healthBar.Scale = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.LocalScale;
-            healthBar.Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
-            healthBar.AutoSize = AutoSizeModes.ScaleToFit;
-            healthBar.Parent = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel;
+            healthBar.AutoSize = AutoSizeModes.None;
+            healthBar.VerticalAlignment = VerticalAlignment.Middle;
+            healthBar.HorizontalAlignment = HorizontalAlignment.Center;
+
             barSettings = new HealthBarSettings();
+
             DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(healthBar);
         }
 
@@ -76,43 +78,42 @@ namespace HealthBarMod
         {
             healthBar.Update();
 
-
             if (advancedSettings)
                 BarSetting();
         }
 
         private void BarSetting()
         {
-            
-            if (Input.GetKeyDown(KeyCode.Period))
+
+            if (Input.GetKeyDown(KeyCode.Backslash))
             {
-                activated = !activated;
                 switch (activated)
                 {
-                    case true:
+                    case 0:
+                        activated++;
                         healthBar.hitNPC = GameManager.Instance.PlayerEntityBehaviour;
                         barSettings.MessageBox();
                         break;
-                    case false:
+                    case 2:
                         healthBar.hitNPC = null;
+
                         InputManager.Instance.enabled = true;
+                        advancedSettings = !advancedSettings;
                         break;
                 }
             }
 
-            
 
-            if (activated)
+            if (activated > 0)
             {
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     healthBar.offset = new Vector2(0, 2);
-                    healthBar.scaleOffset = healthBar.scaleSettings;
+                    healthBar.scaleOffset = 0;
                 }
 
                 healthBar.offset = barSettings.NewPos(healthBar.offset);
                 healthBar.scaleOffset = barSettings.NewScale(healthBar.scaleOffset);
-                healthBar.PanelSetup();
                 healthBar.timerReset = true;
 
                 PlayerPrefs.SetFloat("BarPositionX", healthBar.offset.x);
@@ -120,8 +121,8 @@ namespace HealthBarMod
                 PlayerPrefs.SetInt("BarScale", healthBar.scaleOffset);
                 PlayerPrefs.Save();
 
-
             }
+
         }
 
         public void OnTargetNPC(DaggerfallEntityBehaviour target)
