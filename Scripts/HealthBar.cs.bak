@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using UnityEngine;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
@@ -34,7 +33,6 @@ namespace HealthBarMod
         public int scaleOffset = 0;
 
         public Vector2 offset = new Vector2(0, 2);
-        private string name;
 
 
 
@@ -44,6 +42,11 @@ namespace HealthBarMod
             Back = new Panel();
             Health = new HorizontalProgress();
 
+<<<<<<< HEAD
+            
+=======
+
+>>>>>>> main
             //LoadTextures();
             //PanelSetup();
 
@@ -54,29 +57,37 @@ namespace HealthBarMod
             Components.Add(Back);
             Components.Add(Health);
 
-
+            
         }
 
 
 
         public override void Update()
         {
-
-            Debug.Log(timer);
             if (!hitNPC)
                 return;
 
+<<<<<<< HEAD
+            float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
+            Health.Amount = healthPercent;
+            if (!init)
+            {
+                LoadTextures();
+                PanelSetup();
+=======
 
             if (!init)
             {
                 Size = DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Size;
-                name = RemoveSpaces(hitNPC.Entity.Name);
                 LoadTextures();
                 Health.ProgressTexture = healthTexture;
                 Back.BackgroundTexture = backTexture;
                 Health.Amount = 0;
+>>>>>>> main
                 init = true;
             }
+            TimeUpdate();
+            base.Update();
 
             float healthPercent = hitNPC.Entity.CurrentHealth / (float)hitNPC.Entity.MaxHealth;
 
@@ -109,14 +120,14 @@ namespace HealthBarMod
         void LoadTextures()
         {
             Texture2D[] test = new Texture2D[2];
-            if (LookUpTable.enemyDict.TryGetValue(name, out test))
-            {
+            if(LookUpTable.enemyDict.TryGetValue(hitNPC.Entity.Name, out test)){
 
-                healthTexture = test[0];
-                backTexture = test[1];
-            }
-            else
+            healthTexture = test[0];
+            backTexture = test[1];
+            } else
                 Debug.Log("could not load texture");
+            
+
         }
 
 
@@ -162,7 +173,7 @@ namespace HealthBarMod
             scaleVec = new Vector2(0, scale);
 
             //TODO: bug fixes right here
-
+            
             //scale the size of the nativepanel to the equivalent size of the parentpanel.
             float textureRatio = (float)texture.width / (float)texture.height;
             scaleVec.x = scaleVec.y * textureRatio;
@@ -178,11 +189,6 @@ namespace HealthBarMod
             panel.Position = new Vector2((Size.x / 2) - (panel.Size.x / 2) + offsetResize.x, Size.y - panel.Size.y - offsetResize.y);
 
             return panel;
-        }
-
-        private string RemoveSpaces(string input)
-        {
-            return new string(input.Where(c => !Char.IsWhiteSpace(c)).ToArray());
         }
 
     }

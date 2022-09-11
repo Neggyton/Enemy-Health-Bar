@@ -60,7 +60,6 @@ namespace HealthBarMod
         {
             settings = mod.GetSettings();
             advancedSettings = settings.GetBool("Advanced Location Positioning and Scaling", "Enabled");
-
             LookUpTable.TableCreation();
 
             healthBar = new HealthBar(new Vector2(PlayerPrefs.GetFloat("BarPositionX"), PlayerPrefs.GetFloat("BarPositionY")), PlayerPrefs.GetInt("BarScale"));
@@ -70,6 +69,11 @@ namespace HealthBarMod
             healthBar.HorizontalAlignment = HorizontalAlignment.Center;
 
             barSettings = new HealthBarSettings();
+
+            foreach (KeyValuePair<string, Texture2D[]> i in LookUpTable.enemyDict)
+            {
+                Debug.Log(i.Key + " " + i.Value[0] + " " + i.Value[1]);
+            }
 
             DaggerfallUI.Instance.DaggerfallHUD.ParentPanel.Components.Add(healthBar);
         }
